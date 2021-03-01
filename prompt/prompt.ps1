@@ -18,7 +18,6 @@ param (
     [Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0)
 
 $ErrorActionPreference = "Stop"
-$ohMyVersion = "3.98.0"
 $vsWherePath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
 
 . $PSScriptRoot\functions.ps1
@@ -45,20 +44,12 @@ CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "gf" -action "git fetch origin main"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
+CreateDynamicAlias -name "cr" -action "cargo run"
 
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
-$omp = Get-Module -Name oh-my-posh -ListAvailable
-
-if ($null -eq $omp) {
-    Write-TerminatingError "Missing prompt, run: Install-Module -Name oh-my-posh -RequiredVersion $ohMyVersion"
-}
-
-if ($null -eq ($omp.Version | Where-Object { $_ -eq $ohMyVersion })) {
-    $foundVersions = $omp.Version
-    Write-TerminatingError "Expect to find version $ohMyVersion, but found $foundVersions. Update prompt settings or install via: Install-Module -Name oh-my-posh -RequiredVersion $ohMyVersion"
-}
-
-Import-Module -Name oh-my-posh -RequiredVersion $ohMyVersion
+Import-ModuleEx -name "oh-my-posh" -version "3.98.0"
 Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
+
+$env:RUST_BACKTRACE=1
