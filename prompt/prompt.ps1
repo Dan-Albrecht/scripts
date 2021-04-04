@@ -43,6 +43,7 @@ Remove-Alias -Name gp -Force -ErrorAction Ignore
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "gf" -action "git fetch origin main"
+CreateDynamicAlias -name "pm" -action "git pull origin main"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name "cr" -action "cargo run"
 
