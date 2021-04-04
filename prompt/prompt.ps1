@@ -41,6 +41,7 @@ Remove-Alias -Name gc -Force -ErrorAction Ignore
 Remove-Alias -Name gp -Force -ErrorAction Ignore
 
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
+CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "gf" -action "git fetch origin main"
 CreateDynamicAlias -name "pm" -action "git pull origin main"
@@ -54,3 +55,6 @@ Import-ModuleEx -name "oh-my-posh" -version "3.98.0"
 Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
 
 $env:RUST_BACKTRACE=1
+
+# BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
+Test-Font -name "Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)" -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"

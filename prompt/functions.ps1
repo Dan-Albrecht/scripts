@@ -51,3 +51,22 @@ function Import-ModuleEx {
 
     Import-Module -Name $name -RequiredVersion $version
 }
+
+function Test-Font {
+    param (
+        [Parameter(Mandatory = $true)][string]$name,
+        [Parameter(Mandatory = $true)][string]$remediationInfo
+    )
+
+    $font = Get-ItemProperty 'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts' -Name $name -ErrorAction SilentlyContinue
+    if ($null -ne $font) {
+        return;
+    }
+
+    $font = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts' -Name $name -ErrorAction SilentlyContinue
+    if ($null -ne $font) {
+        return;
+    }
+
+    Write-Warning "Font '$name' was not found, you may have some rendering errors. To remediate: $remediationInfo"
+}
