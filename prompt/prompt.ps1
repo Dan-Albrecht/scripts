@@ -47,6 +47,7 @@ CreateDynamicAlias -name "gf" -action "git fetch origin main"
 CreateDynamicAlias -name "pm" -action "git pull origin main"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name "cr" -action "cargo run"
+CreateDynamicAlias -name "spy64" -action "spyxx_amd64.exe"
 
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
