@@ -1,3 +1,5 @@
+$globalAliases = New-Object Collections.Generic.List[String]
+
 Function CreateDynamicAlias() {
     param(
         [Parameter(Mandatory = $true)][string]$name,
@@ -8,6 +10,17 @@ Function CreateDynamicAlias() {
     $dynamicFunction = "function global:$functionName() {$action}"
     Invoke-Expression $dynamicFunction
     Set-Alias -Name $name -Value $functionName -Scope Global
+    $globalAliases.Add("$name -> $action")
+}
+
+function Get-AliasEx {
+    Get-Alias
+    Write-Host
+    Write-Host "Cool aliases"
+    Write-Host "============"
+    foreach ($alias in $globalAliases) {
+        Write-Host $alias
+    }
 }
 
 function Write-NonTerminatingError {

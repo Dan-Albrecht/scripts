@@ -40,7 +40,10 @@ Remove-Alias -Name kill -Force -ErrorAction Ignore
 Remove-Alias -Name gc -Force -ErrorAction Ignore
 Remove-Alias -Name gp -Force -ErrorAction Ignore
 
+Set-Alias -Name alias -Value "Get-AliasEx" -Scope Global
+
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
+CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "gf" -action "git fetch origin main"
 CreateDynamicAlias -name "pm" -action "git pull origin main"
