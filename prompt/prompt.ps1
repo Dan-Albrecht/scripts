@@ -40,13 +40,20 @@ Remove-Alias -Name kill -Force -ErrorAction Ignore
 Remove-Alias -Name gc -Force -ErrorAction Ignore
 Remove-Alias -Name gp -Force -ErrorAction Ignore
 
+Set-Alias -Name alias -Value "Get-AliasEx" -Scope Global
+
+CreateDynamicAlias -name ".." -action "Set-Location -Path .."
+CreateDynamicAlias -name "..." -action "Set-Location -Path ..\.."
+CreateDynamicAlias -name "...." -action "Set-Location -Path ..\..\.."
+CreateDynamicAlias -name "....." -action "Set-Location -Path ..\..\..\.."
+CreateDynamicAlias -name "cr" -action "cargo run"
+CreateDynamicAlias -name "gf" -action "git fetch origin main"
+CreateDynamicAlias -name "gs" -action "git status"
+CreateDynamicAlias -name "n" -action "notepad.exe `$args"
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
-CreateDynamicAlias -name "gs" -action "git status"
-CreateDynamicAlias -name "gf" -action "git fetch origin main"
 CreateDynamicAlias -name "pm" -action "git pull origin main"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
-CreateDynamicAlias -name "cr" -action "cargo run"
 CreateDynamicAlias -name "spy64" -action "spyxx_amd64.exe"
 
 Set-Location -Path $repoPath
