@@ -6,12 +6,12 @@ Starts a developer prompt centered on a repo.
 Full path of the repo.
 
 .PARAMETER repoName
-Friendly name to refer to the repo as. Will use directory name if not present.
+Friendly name to refer to the repo as.
 #>
 
 param (
     [Parameter(Mandatory = $true)][string]$repoPath, 
-    [Parameter(Mandatory = $false)][string]$repoName = 'Git')
+    [Parameter(Mandatory = $true)][string]$repoName)
 
 $ErrorActionPreference = "Stop"
 
