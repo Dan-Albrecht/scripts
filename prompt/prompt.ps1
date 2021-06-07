@@ -41,6 +41,7 @@ Remove-Alias -Name gc -Force -ErrorAction Ignore
 Remove-Alias -Name gp -Force -ErrorAction Ignore
 
 Set-Alias -Name alias -Value "Get-AliasEx" -Scope Global
+Set-Alias -Name pm -Value "Invoke-PullDefaultBranch" -Scope Global
 
 CreateDynamicAlias -name ".." -action "Set-Location -Path .."
 CreateDynamicAlias -name "..." -action "Set-Location -Path ..\.."
@@ -53,9 +54,10 @@ CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "n" -action "notepad.exe `$args"
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
-CreateDynamicAlias -name "pm" -action "git pull origin main"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
+CreateDynamicAlias -name "rs" -action "code $settingsFile"
 CreateDynamicAlias -name "spy64" -action "spyxx_amd64.exe"
+CreateDynamicAlias -name "xxx" -action "spyxx_amd64.exe"
 
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
@@ -67,3 +69,5 @@ $env:RUST_BACKTRACE=1
 
 # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
 Test-Font -name "Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)" -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
+
+Import-RepoSettings -repoPath $repoPath
