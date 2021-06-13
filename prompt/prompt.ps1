@@ -69,5 +69,3 @@ $env:RUST_BACKTRACE=1
 
 # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
 Test-Font -name "Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)" -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
-
-Import-RepoSettings -repoPath $repoPath
