@@ -62,7 +62,7 @@ CreateDynamicAlias -name "xxx" -action "spyxx_amd64.exe"
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
-Import-ModuleEx -name "oh-my-posh" -version "3.98.0"
+Import-ModuleEx -name "oh-my-posh" -version "3.165.0"
 Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
 
 $env:RUST_BACKTRACE=1
