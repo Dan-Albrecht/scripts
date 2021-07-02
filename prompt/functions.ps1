@@ -5,23 +5,43 @@ $settingsFile = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\..\repoSettin
 Function CreateDynamicAlias() {
     param(
         [Parameter(Mandatory = $true)][string]$name,
-        [Parameter(Mandatory = $true)][string]$action
+        [Parameter(Mandatory = $true)][string]$action,
+        [Parameter(Mandatory = $false)][Switch]$allowArgs
     )
 
     $functionName = [guid]::NewGuid().ToString("N")
-    $dynamicFunction = "function global:$functionName() {$action}"
+    
+    if ($allowArgs) {
+        $dynamicFunction = "function global:$functionName { param([Parameter(Mandatory = " + '$false, ValueFromRemainingArguments = $true)][string[]]$args)' + $action + ' $args }'
+    }
+    else {
+        $dynamicFunction = "function global:$functionName() {$action}"
+    }
+
     Invoke-Expression $dynamicFunction
+
+    # Get rid of anything that might have been here before us. Usually this is annoying PowerShell builtins.
+    Remove-Alias -Name $name -Force -ErrorAction Ignore
     Set-Alias -Name $name -Value $functionName -Scope Global
     $globalAliases.Add("$name -> $action")
 }
 
-function Invoke-PullDefaultBranch {
+function Invoke-FetchPullDefaultBranch {
+    param (
+        [Parameter(Mandatory = $true)][bool]$fetchOnly
+    )
     $currentSettings = [RepoSettings]::GetCurrentSettings($settingsFile)
-    $pullBranch = $currentSettings.DefaultBranch
+    $defaultBranch = $currentSettings.DefaultBranch
 
     # Progress seems to be going to stderr and screwing this up...
-    # Invoke-WithErrorHandling "git" @('pull', 'origin', $pullBranch)
-    git pull origin $pullBranch
+    # Invoke-WithErrorHandling "git" @('pull', 'origin', $defaultBranch)
+
+    if ($fetchOnly) {
+        git fetch origin $defaultBranch
+    }
+    else {
+        git pull origin $defaultBranch
+    }    
 }
 
 function Invoke-WithErrorHandling {
