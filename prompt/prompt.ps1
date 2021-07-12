@@ -39,31 +39,31 @@ else {
     Write-Warning "VS was not found so you're not gonna have (m)any build tools"
 }
 
-# PowerShell overwrites actual exes I want with junk aliases
-# and also camps on aliases I want to use with junk, so get rid of them.
-Remove-Alias -Name where -Force -ErrorAction Ignore
+# Stop PowerShell from camping on exes we care about
 Remove-Alias -Name kill -Force -ErrorAction Ignore
-Remove-Alias -Name gc -Force -ErrorAction Ignore
-Remove-Alias -Name gp -Force -ErrorAction Ignore
+Remove-Alias -Name where -Force -ErrorAction Ignore
+
+# Some scoping thing that I don't undertand that forces me to clear out here instead of automatically like all other CreateDynamicAlias calls...
+Remove-Alias -Name dir -Force -ErrorAction Ignore
 
 Set-Alias -Name alias -Value "Get-AliasEx" -Scope Global
-Set-Alias -Name pm -Value "Invoke-PullDefaultBranch" -Scope Global
 
 CreateDynamicAlias -name ".." -action "Set-Location -Path .."
 CreateDynamicAlias -name "..." -action "Set-Location -Path ..\.."
 CreateDynamicAlias -name "...." -action "Set-Location -Path ..\..\.."
 CreateDynamicAlias -name "....." -action "Set-Location -Path ..\..\..\.."
 CreateDynamicAlias -name "cr" -action "cargo run"
-CreateDynamicAlias -name "gf" -action "git fetch origin main"
-CreateDynamicAlias -name "gp" -action "$PSScriptRoot\generatePrompt.ps1"
+CreateDynamicAlias -name "dir" -action "cmd /c dir" -allowArgs
+CreateDynamicAlias -name "gf" -action 'Invoke-FetchPullDefaultBranch -fetchOnly $true'
+CreateDynamicAlias -name "gp" -action 'Invoke-FetchPullDefaultBranch -fetchOnly $false'
 CreateDynamicAlias -name "gs" -action "git status"
+CreateDynamicAlias -name "mp" -action "$PSScriptRoot\generatePrompt.ps1"
 CreateDynamicAlias -name "n" -action "notepad.exe `$args"
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name "rs" -action "code $settingsFile"
 CreateDynamicAlias -name "spy64" -action "spyxx_amd64.exe"
-CreateDynamicAlias -name "xxx" -action "spyxx_amd64.exe"
 
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
