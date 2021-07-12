@@ -1,3 +1,15 @@
+class PromptSettings {
+    
+    [Collections.Generic.List[String]]$Aliases
+
+    [ValidateNotNullOrEmpty()][string]$SettingsFile
+
+    PromptSettings() {
+        $this.Aliases = New-Object Collections.Generic.List[String]
+        $this.SettingsFile = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\..\repoSettings.json")
+    }
+}
+
 class RepoSettings {
     # Full path to the root of the repo
     [ValidateNotNullOrEmpty()][string]$Root

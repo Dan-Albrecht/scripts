@@ -1,8 +1,45 @@
-$globalAliases = New-Object Collections.Generic.List[String]
-$settingsFile = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\..\repoSettings.json")
-. $PSScriptRoot\customTypes.ps1
+function prompt {
+    $rightFlame = [char]::ConvertFromUtf32(0xe0c0)
+    $triangleRight = [char]::ConvertFromUtf32(0xe0b0)
+    $exitGlyph = [char]::ConvertFromUtf32(0xf705)
+    $noGit = [char]::ConvertFromUtf32(0xf663)
+    $highVoltage = [char]::ConvertFromUtf32(0x26a1)
+    $origLastExitCode = $LASTEXITCODE
+    $date = Get-Date -Format "[HH:mm]"
+    $prompt = ""
 
-Function CreateDynamicAlias() {
+    if (Test-Administrator) {
+        $prompt += $highVoltage
+    }
+
+    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Green -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Green -Object $date
+    $prompt += Write-Prompt -ForegroundColor Green -BackgroundColor Blue -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Blue -Object "$($ExecutionContext.SessionState.Path.CurrentLocation)"
+    $prompt += Write-Prompt -ForegroundColor Blue -BackgroundColor Gray -Object $triangleRight
+
+    if ($status = Get-GitStatus -Force) {
+        $temp = $GitPromptSettings.PathStatusSeparator.Text
+        $GitPromptSettings.PathStatusSeparator.Text = ""
+        $status = Write-GitStatus -Status $status
+        $GitPromptSettings.PathStatusSeparator.Text = $temp
+        $prompt += Write-Prompt -BackgroundColor Gray -Object $status
+    }
+    else {
+        $prompt += Write-Prompt -ForegroundColor "White" -BackgroundColor "Gray" -Object ($noGit + " ")
+    }
+
+    $prompt += Write-Prompt -ForegroundColor Gray -BackgroundColor Yellow -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Yellow -Object "$exitGlyph $origLastExitCode "
+    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Red -Object " "
+    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Black -Object $rightFlame
+    $prompt += "`n"
+
+    $LASTEXITCODE = $origLastExitCode
+    $prompt
+}
+
+function CreateDynamicAlias() {
     param(
         [Parameter(Mandatory = $true)][string]$name,
         [Parameter(Mandatory = $true)][string]$action
@@ -12,11 +49,11 @@ Function CreateDynamicAlias() {
     $dynamicFunction = "function global:$functionName() {$action}"
     Invoke-Expression $dynamicFunction
     Set-Alias -Name $name -Value $functionName -Scope Global
-    $globalAliases.Add("$name -> $action")
+    $PromptSettings.Aliases.Add("$name -> $action")
 }
 
 function Invoke-PullDefaultBranch {
-    $currentSettings = [RepoSettings]::GetCurrentSettings($settingsFile)
+    $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
     $pullBranch = $currentSettings.DefaultBranch
 
     # Progress seems to be going to stderr and screwing this up...
@@ -45,7 +82,7 @@ function Get-AliasEx {
     Write-Host
     Write-Host "Cool aliases"
     Write-Host "============"
-    foreach ($alias in $globalAliases) {
+    foreach ($alias in $PromptSettings.Aliases) {
         Write-Host $alias
     }
 }

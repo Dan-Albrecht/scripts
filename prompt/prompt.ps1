@@ -20,12 +20,18 @@ param (
 $ErrorActionPreference = "Stop"
 $vsWherePath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
 
+. $PSScriptRoot\customTypes.ps1
 . $PSScriptRoot\functions.ps1
+$global:PromptSettings = [PromptSettings]::new()
 
 if (Test-Path -Path $vsWherePath) {
+    Write-Host "Getting VS install path..."
     $vsInstallPath = & $vsWherePath -prerelease -latest -property installationPath
+    Write-Host "Getting VS display name..."
     $vsToolsDisplayName = & $vsWherePath -prerelease -latest -property catalog_productDisplayVersion
+    Write-Host "Loading VS module..."
     Import-Module (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
+    Write-Host "Loading dev shell..."
     Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null
     Write-Host "Tools version: $vsToolsDisplayName"
 }
@@ -62,10 +68,14 @@ CreateDynamicAlias -name "xxx" -action "spyxx_amd64.exe"
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
-Import-ModuleEx -name "oh-my-posh" -version "3.165.0"
-Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
+# v3 is painfully slow compared to v2
+# Import-ModuleEx -name "oh-my-posh" -version "3.165.0"
+# Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
 
-$env:RUST_BACKTRACE=1
+# We could just use v2, but we don't really even need that fanciness. Just to it by hand.
+Import-ModuleEx -name "posh-git" -version "1.0.0"
+
+$env:RUST_BACKTRACE = 1
 
 # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
 Test-Font -name "Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)" -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
