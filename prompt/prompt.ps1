@@ -25,14 +25,14 @@ $vsWherePath = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere
 $global:PromptSettings = [PromptSettings]::new()
 
 if (Test-Path -Path $vsWherePath) {
-    Write-Host "Getting VS install path..."
-    $vsInstallPath = & $vsWherePath -prerelease -latest -property installationPath
-    Write-Host "Getting VS display name..."
-    $vsToolsDisplayName = & $vsWherePath -prerelease -latest -property catalog_productDisplayVersion
-    Write-Host "Loading VS module..."
-    Import-Module (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
-    Write-Host "Loading dev shell..."
-    Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null
+    Write-Host "Getting VS install path..." -NoNewline
+    . TimeCommand { $vsInstallPath = & $vsWherePath -prerelease -latest -property installationPath }
+    Write-Host "Getting VS display name..." -NoNewline
+    . TimeCommand { $vsToolsDisplayName = & $vsWherePath -prerelease -latest -property catalog_productDisplayVersion }
+    Write-Host "Loading VS module..." -NoNewline
+    . TimeCommand { Import-Module (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName }
+    Write-Host "Loading dev shell..." -NoNewline
+    . TimeCommand { Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null }
     Write-Host "Tools version: $vsToolsDisplayName"
 }
 else {

@@ -5,6 +5,9 @@ function prompt {
     $noGit = [char]::ConvertFromUtf32(0xf663)
     $highVoltage = [char]::ConvertFromUtf32(0x26a1)
     $origLastExitCode = $LASTEXITCODE
+
+    # Could also names from https://www.w3schools.com/Colors/colors_names.asp
+    $gitStatusBackgroundColor = "#663399"
     $date = Get-Date -Format "[HH:mm]"
     $prompt = ""
 
@@ -16,20 +19,20 @@ function prompt {
     $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Green -Object $date
     $prompt += Write-Prompt -ForegroundColor Green -BackgroundColor Blue -Object $triangleRight
     $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Blue -Object "$($ExecutionContext.SessionState.Path.CurrentLocation)"
-    $prompt += Write-Prompt -ForegroundColor Blue -BackgroundColor Gray -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor Blue -BackgroundColor $gitStatusBackgroundColor -Object $triangleRight
 
     if ($status = Get-GitStatus -Force) {
         $temp = $GitPromptSettings.PathStatusSeparator.Text
         $GitPromptSettings.PathStatusSeparator.Text = ""
         $status = Write-GitStatus -Status $status
         $GitPromptSettings.PathStatusSeparator.Text = $temp
-        $prompt += Write-Prompt -BackgroundColor Gray -Object $status
+        $prompt += Write-Prompt -BackgroundColor $gitStatusBackgroundColor -Object $status
     }
     else {
-        $prompt += Write-Prompt -ForegroundColor "White" -BackgroundColor "Gray" -Object ($noGit + " ")
+        $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $gitStatusBackgroundColor -Object ($noGit + " ")
     }
 
-    $prompt += Write-Prompt -ForegroundColor Gray -BackgroundColor Yellow -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor $gitStatusBackgroundColor -BackgroundColor Yellow -Object $triangleRight
     $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Yellow -Object "$exitGlyph $origLastExitCode "
     $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Red -Object " "
     $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Black -Object $rightFlame
@@ -166,4 +169,18 @@ function Test-Font {
     }
 
     Write-Warning "Font '$name' was not found, you may have some rendering errors. To remediate: $remediationInfo"
+}
+
+function TimeCommand {
+    param (
+        [Parameter(Mandatory = $true)][ScriptBlock]$scriptBlock
+    )
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    . $scriptBlock
+    $sw.Stop()
+
+    $sw = $sw.ElapsedMilliseconds.ToString("N0")
+    $sw = "Completed in $sw" + "ms"
+    Write-Host $sw
 }
