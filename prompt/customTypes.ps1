@@ -1,3 +1,8 @@
+enum TargetBranch {
+    Default
+    Upstream
+}
+
 class PromptSettings {
     
     [Collections.Generic.List[String]]$Aliases

@@ -54,13 +54,15 @@ CreateDynamicAlias -name "...." -action "Set-Location -Path ..\..\.."
 CreateDynamicAlias -name "....." -action "Set-Location -Path ..\..\..\.."
 CreateDynamicAlias -name "cr" -action "cargo run"
 CreateDynamicAlias -name "dir" -action "cmd /c dir" -allowArgs
-CreateDynamicAlias -name "gf" -action 'Invoke-FetchPullDefaultBranch -fetchOnly $true'
-CreateDynamicAlias -name "gp" -action 'Invoke-FetchPullDefaultBranch -fetchOnly $false'
+CreateDynamicAlias -name "fm" -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Default'
+CreateDynamicAlias -name "fu" -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Upstream'
 CreateDynamicAlias -name "gs" -action "git status"
 CreateDynamicAlias -name "mp" -action "$PSScriptRoot\generatePrompt.ps1"
 CreateDynamicAlias -name "n" -action "notepad.exe `$args"
 CreateDynamicAlias -name "nt" -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name "nt2" -action "Set-Location -Path '$PSScriptRoot'"
+CreateDynamicAlias -name "pm" -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
+CreateDynamicAlias -name "pu" -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
 CreateDynamicAlias -name "re" -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name "rs" -action "code $settingsFile"
 CreateDynamicAlias -name "spy64" -action "spyxx_amd64.exe"

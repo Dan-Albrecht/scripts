@@ -8,6 +8,7 @@ function prompt {
 
     # Could also names from https://www.w3schools.com/Colors/colors_names.asp
     $gitStatusBackgroundColor = "#663399"
+    $timeBackgroundColor = "#00CF00"
     $date = Get-Date -Format "[HH:mm]"
     $prompt = ""
 
@@ -15,9 +16,9 @@ function prompt {
         $prompt += $highVoltage
     }
 
-    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Green -Object $triangleRight
-    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Green -Object $date
-    $prompt += Write-Prompt -ForegroundColor Green -BackgroundColor Blue -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor $timeBackgroundColor -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $timeBackgroundColor -Object $date
+    $prompt += Write-Prompt -ForegroundColor $timeBackgroundColor -BackgroundColor Blue -Object $triangleRight
     $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Blue -Object "$($ExecutionContext.SessionState.Path.CurrentLocation)"
     $prompt += Write-Prompt -ForegroundColor Blue -BackgroundColor $gitStatusBackgroundColor -Object $triangleRight
 
@@ -66,22 +67,40 @@ function CreateDynamicAlias() {
     $PromptSettings.Aliases.Add("$name -> $action")
 }
 
-function Invoke-FetchPullDefaultBranch {
+function Invoke-FetchPull {
     param (
-        [Parameter(Mandatory = $true)][bool]$fetchOnly
+        [Parameter(Mandatory = $true)][bool]$fetchOnly,
+        [Parameter(Mandatory = $true)][TargetBranch]$targetBranch
     )
-    $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
-    $defaultBranch = $currentSettings.DefaultBranch
 
-    # Progress seems to be going to stderr and screwing this up...
-    # Invoke-WithErrorHandling "git" @('pull', 'origin', $defaultBranch)
+    if ($status = Get-GitStatus -Force) {
+        $upstreamParts = $status.Upstream.Split("/", 2)
+        $remote = $upstreamParts[0]
+        $upstream = $upstreamParts[1]
+        $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
+        $defaultBranch = $currentSettings.DefaultBranch
+        $action = ""
+        $branchName = ""
 
-    if ($fetchOnly) {
-        git fetch origin $defaultBranch
+        if ($fetchOnly) {
+            $action = "fetch"
+        }
+        else {
+            $action = "pull"
+        }
+
+        switch ($targetBranch) {
+            ([TargetBranch]::Default) { $branchName = $defaultBranch }
+            ([TargetBranch]::Upstream) { $branchName = $upstream }
+            Default { throw "Dunno what to do with $targetBranch" }
+        }
+    
+        Write-Host "Action: $action Remote: $remote Branch: $branchName"
     }
     else {
-        git pull origin $defaultBranch
-    }    
+        Write-NonTerminatingError "This isn't a git repo..."
+    }
+    
 }
 
 function Invoke-WithErrorHandling {
