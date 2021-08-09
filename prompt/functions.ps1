@@ -75,6 +75,11 @@ function Invoke-FetchPull {
 
     if ($status = Get-GitStatus -Force) {
         $upstreamParts = $status.Upstream.Split("/", 2)
+
+        if ($null -eq $upstreamParts -or 2 -ne $upstreamParts.Count) {
+            throw "Couldn't figure out upstream"
+        }
+
         $remote = $upstreamParts[0]
         $upstream = $upstreamParts[1]
         $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
@@ -94,8 +99,8 @@ function Invoke-FetchPull {
             ([TargetBranch]::Upstream) { $branchName = $upstream }
             Default { throw "Dunno what to do with $targetBranch" }
         }
-    
-        Write-Host "Action: $action Remote: $remote Branch: $branchName"
+
+        git.exe $action $remote $branchName
     }
     else {
         Write-NonTerminatingError "This isn't a git repo..."
