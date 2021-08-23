@@ -67,6 +67,25 @@ function CreateDynamicAlias() {
     $PromptSettings.Aliases.Add("$name -> $action")
 }
 
+function Invoke-GitPush {
+    param (
+        [Parameter(Mandatory = $false)][string]$commitMessage
+    )
+
+    if ([string]::IsNullOrWhiteSpace($commitMessage)) {
+        $commitMessage = Read-Host 'Commit message'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($commitMessage)) {
+        Write-Host 'Giving up...'
+    }
+    else {
+        git add .
+        git commit -m '$commitMessage'
+        git push
+    }
+}
+
 function Invoke-CheckPowerShell {
     param ()
 
@@ -82,7 +101,7 @@ function Invoke-CheckPowerShell {
         
         Write-Host "PowerShell version $installed is out of date, update to ${release}:"
         Write-Host $downloadURL        
-        $answer = Read-Host 'Do you want to install it now (y/n)?'
+        $answer = Read-Host 'Do you want to install it now (y/n)'
         
         if ($answer -eq 'y' -or $answer -eq 'yes') {
             $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())

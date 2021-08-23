@@ -27,13 +27,19 @@ $global:PromptSettings = [PromptSettings]::new()
 
 if (Test-Path -Path $vsWherePath) {
     Write-Host 'Getting VS install path...' -NoNewline
-    . TimeCommand { $vsInstallPath = & $vsWherePath -prerelease -latest -all -property installationPath }
+    . TimeCommand { 
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+        $vsInstallPath = & $vsWherePath -prerelease -latest -all -property installationPath 
+    }
     if ($null -eq $vsInstallPath) {
         Write-Host 'VSWhere is screwed up again'
     }
     else {
         Write-Host 'Getting VS display name...' -NoNewline
-        . TimeCommand { $vsToolsDisplayName = & $vsWherePath -prerelease -latest -all -property catalog_productDisplayVersion }
+        . TimeCommand { 
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+            $vsToolsDisplayName = & $vsWherePath -prerelease -latest -all -property catalog_productDisplayVersion 
+        }
         Write-Host 'Loading VS module...' -NoNewline
         $vsModule = (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
         if ($null -eq $vsModule) {
@@ -82,6 +88,7 @@ CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name 'nt2' -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
+CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
 CreateDynamicAlias -name 're' -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name 'rs' -action "code $settingsFile"
 CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
