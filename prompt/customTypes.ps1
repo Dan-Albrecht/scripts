@@ -31,7 +31,7 @@ class RepoSettings {
         $typeName = $method.DeclaringType.FullName
         # Seems like single object vs array will come in with different stack
         # so just look for the namespace subsring; good enough
-        $expectedTypeStartsWith = "System.Text.Json.Serialization."
+        $expectedTypeStartsWith = 'System.Text.Json.Serialization.'
 
         if ($false -eq $typeName.StartsWith($expectedTypeStartsWith)) {
             Write-Error "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
@@ -67,14 +67,14 @@ class RepoSettings {
     [string] static GenerateExample() {
         $currentRoot = [RepoSettings]::GetCurrentRepoRoot()
         $example = [RepoSettings[]]@(
-            [RepoSettings]::new($currentRoot, "main")
+            [RepoSettings]::new($currentRoot, 'main')
         )
         $example = [System.Text.Json.JsonSerializer]::Serialize($example, $null)
         return $example
     }
 
     [string] static GetCurrentRepoRoot() {
-        $output = Invoke-WithErrorHandling "git" @('rev-parse', '--show-toplevel')
+        $output = Invoke-WithErrorHandling 'git' @('rev-parse', '--show-toplevel')
 
         # Output array should only have one line that is the repo, anything else and some assumption is wrong
         if ($output.Count -ne 1) {

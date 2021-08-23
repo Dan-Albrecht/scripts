@@ -13,7 +13,7 @@ param (
     [Parameter(Mandatory = $true)][string]$repoPath, 
     [Parameter(Mandatory = $true)][string]$repoName)
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
 if (!(Test-Path -Path $repoPath)) {
     Write-Error "'$repoPath' does not exist"
@@ -24,7 +24,7 @@ $powerShellPath = (Get-Process -Id $PID).Path
 Write-Host "We'll be using $powerShellPath for our child shell"
 
 $magicExitCode = 27
-$scriptArgs = @("-NoExit", "-NoLogo", "-Interactive", "-File", "$PSScriptRoot\prompt.ps1", "-repoPath", $repoPath, "-repoName", $repoName, "-relaunchMeExitCode", $magicExitCode)
+$scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\prompt.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
 $loop = $false
 
 do {

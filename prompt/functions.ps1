@@ -7,10 +7,10 @@ function prompt {
     $origLastExitCode = $LASTEXITCODE
 
     # Could also names from https://www.w3schools.com/Colors/colors_names.asp
-    $gitStatusBackgroundColor = "#663399"
-    $timeBackgroundColor = "#00CF00"
-    $date = Get-Date -Format "[HH:mm]"
-    $prompt = ""
+    $gitStatusBackgroundColor = '#663399'
+    $timeBackgroundColor = '#00CF00'
+    $date = Get-Date -Format '[HH:mm]'
+    $prompt = ''
 
     if (Test-Administrator) {
         $prompt += $highVoltage
@@ -24,18 +24,18 @@ function prompt {
 
     if ($status = Get-GitStatus -Force) {
         $temp = $GitPromptSettings.PathStatusSeparator.Text
-        $GitPromptSettings.PathStatusSeparator.Text = ""
+        $GitPromptSettings.PathStatusSeparator.Text = ''
         $status = Write-GitStatus -Status $status
         $GitPromptSettings.PathStatusSeparator.Text = $temp
         $prompt += Write-Prompt -BackgroundColor $gitStatusBackgroundColor -Object $status
     }
     else {
-        $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $gitStatusBackgroundColor -Object ($noGit + " ")
+        $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $gitStatusBackgroundColor -Object ($noGit + ' ')
     }
 
     $prompt += Write-Prompt -ForegroundColor $gitStatusBackgroundColor -BackgroundColor Yellow -Object $triangleRight
     $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Yellow -Object "$exitGlyph $origLastExitCode "
-    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Red -Object " "
+    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Red -Object ' '
     $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Black -Object $rightFlame
     $prompt += "`n"
 
@@ -50,7 +50,7 @@ function CreateDynamicAlias() {
         [Parameter(Mandatory = $false)][Switch]$allowArgs
     )
 
-    $functionName = [guid]::NewGuid().ToString("N")
+    $functionName = [guid]::NewGuid().ToString('N')
     
     if ($allowArgs) {
         $dynamicFunction = "function global:$functionName { param([Parameter(Mandatory = " + '$false, ValueFromRemainingArguments = $true)][string[]]$args)' + $action + ' $args }'
@@ -67,6 +67,40 @@ function CreateDynamicAlias() {
     $PromptSettings.Aliases.Add("$name -> $action")
 }
 
+function Invoke-CheckPowerShell {
+    param ()
+
+    # https://github.com/PowerShell/PowerShell/blob/master/tools/install-powershell.ps1
+    $metadata = Invoke-RestMethod https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json
+    $release = $metadata.ReleaseTag -replace '^v'
+    $release = [System.Management.Automation.SemanticVersion]::new($release)
+    $installed = $PSVersionTable.PSVersion
+
+    if ($installed -lt $release) {
+        $packageName = "PowerShell-${release}-win-x64.msi"
+        $downloadURL = "https://github.com/PowerShell/PowerShell/releases/download/v${release}/${packageName}"
+        
+        Write-Host "PowerShell version $installed is out of date, update to ${release}:"
+        Write-Host $downloadURL        
+        $answer = Read-Host 'Do you want to install it now (y/n)?'
+        
+        if ($answer -eq 'y' -or $answer -eq 'yes') {
+            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+            $null = New-Item -ItemType Directory -Path $tempDir
+            $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
+            Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath
+            Start-Process $packagePath -Wait
+        }
+        else {
+            Write-Host 'Loser'
+        }
+    }
+    elseif ($installed -gt $release) {
+        Write-Warning "You're running a future version?"
+    }
+
+}
+
 function Invoke-FetchPull {
     param (
         [Parameter(Mandatory = $true)][bool]$fetchOnly,
@@ -74,19 +108,19 @@ function Invoke-FetchPull {
     )
 
     if ($status = Get-GitStatus -Force) {
-        $upstreamParts = $status.Upstream.Split("/", 2)
+        $upstreamParts = $status.Upstream.Split('/', 2)
         $remote = $upstreamParts[0]
         $upstream = $upstreamParts[1]
         $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
         $defaultBranch = $currentSettings.DefaultBranch
-        $action = ""
-        $branchName = ""
+        $action = ''
+        $branchName = ''
 
         if ($fetchOnly) {
-            $action = "fetch"
+            $action = 'fetch'
         }
         else {
-            $action = "pull"
+            $action = 'pull'
         }
 
         switch ($targetBranch) {
@@ -122,8 +156,8 @@ function Invoke-WithErrorHandling {
 function Get-AliasEx {
     Get-Alias
     Write-Host
-    Write-Host "Cool aliases"
-    Write-Host "============"
+    Write-Host 'Cool aliases'
+    Write-Host '============'
     foreach ($alias in $PromptSettings.Aliases) {
         Write-Host $alias
     }
@@ -163,7 +197,7 @@ function Import-ModuleEx {
 
     if ($null -eq ($modules.Version | Where-Object { $_ -eq $version })) {
         $foundVersions = $modules.Version
-        $foundVersions = [string]::Join(", ", $foundVersions)
+        $foundVersions = [string]::Join(', ', $foundVersions)
         Write-NonTerminatingError "While loading $name expected to find version $version, but found $foundVersions."
         Write-TerminatingError "Update prompt settings or install via: Install-Module -Name $name -RequiredVersion $version"
     }
@@ -199,7 +233,7 @@ function TimeCommand {
     . $scriptBlock
     $sw.Stop()
 
-    $sw = $sw.ElapsedMilliseconds.ToString("N0")
-    $sw = "Completed in $sw" + "ms"
+    $sw = $sw.ElapsedMilliseconds.ToString('N0')
+    $sw = "Completed in $sw" + 'ms'
     Write-Host $sw
 }
