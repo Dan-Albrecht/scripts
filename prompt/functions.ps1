@@ -12,7 +12,10 @@ function prompt {
     $date = Get-Date -Format '[HH:mm]'
     $prompt = ''
 
-    if (Test-Administrator) {
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+    if ($isAdmin) {
         $prompt += $highVoltage
     }
 
