@@ -7,36 +7,50 @@ function prompt {
     $origLastExitCode = $LASTEXITCODE
 
     # Could also names from https://www.w3schools.com/Colors/colors_names.asp
-    $gitStatusBackgroundColor = '#663399'
-    $timeBackgroundColor = '#00CF00'
+    $adminForgeground = 'Yellow'
+    $adminBackground = 'Black'
+    $timeForeground = 'White'
+    $timeBackground = '#00CF00'
+    $directoryForeground = 'White'
+    $directoryBackground = 'Blue'
+    $gitStatusForeground = 'White' # Only used for not git dirs
+    $gitStatusBackground = 'Black'
+    $exitForeground = 'Black'
+    $exitBackground = 'Yellow'
+    $flameForeground = 'Red'
+    $flameBackground = 'Black'
+
     $date = Get-Date -Format '[HH:mm]'
     $prompt = ''
 
     if (Test-Administrator) {
-        $prompt += $highVoltage
+        $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $highVoltage
+    } else {
+        $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object '💩'
     }
 
-    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor $timeBackgroundColor -Object $triangleRight
-    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $timeBackgroundColor -Object $date
-    $prompt += Write-Prompt -ForegroundColor $timeBackgroundColor -BackgroundColor Blue -Object $triangleRight
-    $prompt += Write-Prompt -ForegroundColor White -BackgroundColor Blue -Object "$($ExecutionContext.SessionState.Path.CurrentLocation)"
-    $prompt += Write-Prompt -ForegroundColor Blue -BackgroundColor $gitStatusBackgroundColor -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor $adminBackground -BackgroundColor $timeBackground -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor $timeForeground -BackgroundColor $timeBackground -Object $date
+    $prompt += Write-Prompt -ForegroundColor $timeBackground -BackgroundColor $directoryBackground -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor $directoryForeground -BackgroundColor $directoryBackground -Object "$($ExecutionContext.SessionState.Path.CurrentLocation)"
+    $prompt += Write-Prompt -ForegroundColor $directoryBackground -BackgroundColor $gitStatusBackground -Object $triangleRight
 
     if ($status = Get-GitStatus -Force) {
         $temp = $GitPromptSettings.PathStatusSeparator.Text
         $GitPromptSettings.PathStatusSeparator.Text = ''
         $status = Write-GitStatus -Status $status
         $GitPromptSettings.PathStatusSeparator.Text = $temp
-        $prompt += Write-Prompt -BackgroundColor $gitStatusBackgroundColor -Object $status
+
+        # $status is already (multi) colored, so don't set it
+        $prompt += Write-Prompt -BackgroundColor $gitStatusBackground -Object $status
     }
     else {
-        $prompt += Write-Prompt -ForegroundColor White -BackgroundColor $gitStatusBackgroundColor -Object ($noGit + ' ')
+        $prompt += Write-Prompt -ForegroundColor $gitStatusForeground -BackgroundColor $gitStatusBackground -Object ($noGit + ' ')
     }
 
-    $prompt += Write-Prompt -ForegroundColor $gitStatusBackgroundColor -BackgroundColor Yellow -Object $triangleRight
-    $prompt += Write-Prompt -ForegroundColor Black -BackgroundColor Yellow -Object "$exitGlyph $origLastExitCode "
-    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Red -Object ' '
-    $prompt += Write-Prompt -ForegroundColor Red -BackgroundColor Black -Object $rightFlame
+    $prompt += Write-Prompt -ForegroundColor $gitStatusBackground -BackgroundColor $exitBackground -Object $triangleRight
+    $prompt += Write-Prompt -ForegroundColor $exitForeground -BackgroundColor $exitBackground -Object "$exitGlyph $origLastExitCode "
+    $prompt += Write-Prompt -ForegroundColor $flameForeground -BackgroundColor $flameBackground -Object $rightFlame
     $prompt += "`n"
 
     $LASTEXITCODE = $origLastExitCode
