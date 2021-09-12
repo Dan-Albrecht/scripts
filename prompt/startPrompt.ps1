@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Starts a developer prompt centered on a repo.
+Starts a developer prompt as a child process with the ability to reload it clean.
 
 .PARAMETER repoPath
 Full path of the repo.
@@ -24,7 +24,7 @@ $powerShellPath = (Get-Process -Id $PID).Path
 Write-Host "We'll be using $powerShellPath for our child shell"
 
 $magicExitCode = 27
-$scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\prompt.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
+$scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\promptInit.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
 $loop = $false
 
 do {
