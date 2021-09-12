@@ -89,6 +89,18 @@ function Invoke-GitPush {
         [Parameter(Mandatory = $false)][string]$commitMessage
     )
 
+    $aheadBy = (Get-GitStatus -Force).AheadBy
+
+    if($null -eq $aheadBy) {
+        Write-Error "Can't push when you're not in a repo..."
+        return
+    }
+
+    if($aheadBy -gt 0){
+        git push
+        return
+    }
+
     if ([string]::IsNullOrWhiteSpace($commitMessage)) {
         $commitMessage = Read-Host 'Commit message'
     }
@@ -98,7 +110,7 @@ function Invoke-GitPush {
     }
     else {
         git add .
-        git commit -m '$commitMessage'
+        git commit -m "$commitMessage"
         git push
     }
 }
