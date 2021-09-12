@@ -18,6 +18,12 @@ param (
     [Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0)
 
 $ErrorActionPreference = 'Stop'
+
+# Set this immeidately with the builtin syntax incase we have any errors
+# We'll override with our style if we make it that far in init
+function RelaunchMe {exit $relaunchMeExitCode}
+Set-Alias -Name 're' -Value 'RelaunchMe'
+
 $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 $debuggersPath = 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64'
 
@@ -90,6 +96,8 @@ CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targe
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
 CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
 CreateDynamicAlias -name 're' -action "exit $relaunchMeExitCode"
+# We made it this far so clean up our temp function
+Remove-Item -Path Function:\RelaunchMe
 CreateDynamicAlias -name 'rs' -action "code $settingsFile"
 CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
@@ -97,11 +105,6 @@ CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
-# v3 is painfully slow compared to v2
-# Import-ModuleEx -name "oh-my-posh" -version "3.165.0"
-# Set-PoshPrompt -Theme $PSScriptRoot\ohMyPosh.json
-
-# We could just use v2, but we don't really even need that fanciness. Just to it by hand.
 Import-ModuleEx -name 'posh-git' -version '1.0.0'
 
 $env:RUST_BACKTRACE = 1
