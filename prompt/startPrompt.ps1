@@ -7,11 +7,15 @@ Full path of the repo.
 
 .PARAMETER repoName
 Friendly name to refer to the repo as.
+
+.PARAMETER stage2Script
+Full path to an optional second stage script to run after all other init complete.
 #>
 
 param (
     [Parameter(Mandatory = $true)][string]$repoPath, 
-    [Parameter(Mandatory = $true)][string]$repoName)
+    [Parameter(Mandatory = $true)][string]$repoName,
+    [Parameter(Mandatory = $false)][string]$stage2Script)
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,6 +29,10 @@ Write-Host "We'll be using $powerShellPath for our child shell"
 
 $magicExitCode = 27
 $scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\promptInit.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
+if(![string]::IsNullOrWhiteSpace($stage2Script)){
+    $scriptArgs += @('-stage2Script', $stage2Script)
+}
+
 $loop = $false
 
 do {

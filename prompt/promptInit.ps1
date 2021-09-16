@@ -10,18 +10,22 @@ Friendly name to refer to the repo as.
 
 .PARAMETER relaunchMeExitCode
 Exit code to use if this script wants to be relaunched.
+
+.PARAMETER stage2Script
+Full path to an optional second stage script to run after all other init complete.
 #>
 
 param (
     [Parameter(Mandatory = $true)][string]$repoPath, 
     [Parameter(Mandatory = $true)][string]$repoName,
-    [Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0)
+    [Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0,
+    [Parameter(Mandatory = $false)][string]$stage2Script)
 
 $ErrorActionPreference = 'Stop'
 
 # Set this immeidately with the builtin syntax incase we have any errors
 # We'll override with our style if we make it that far in init
-function RelaunchMe {exit $relaunchMeExitCode}
+function RelaunchMe { exit $relaunchMeExitCode }
 Set-Alias -Name 're' -Value 'RelaunchMe'
 
 $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
@@ -111,5 +115,15 @@ $env:RUST_BACKTRACE = 1
 
 # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
 Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
+
+if (![string]::IsNullOrWhiteSpace($stage2Script)) {
+    if (Test-Path -Path $stage2Script) {
+        Write-Host "Chaining to $stage2Script..."
+        . $stage2Script
+    }
+    else {
+        Write-Error "Stage2 script $stage2Script doesn't exist"
+    }
+}
 
 Invoke-CheckPowerShell
