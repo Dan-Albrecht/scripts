@@ -102,7 +102,7 @@ CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
 CreateDynamicAlias -name 're' -action "exit $relaunchMeExitCode"
 # We made it this far so clean up our temp function
 Remove-Item -Path Function:\RelaunchMe
-CreateDynamicAlias -name 'rs' -action "code $settingsFile"
+CreateDynamicAlias -name 'rs' -action "code $($PromptSettings.SettingsFile)"
 CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
