@@ -28,7 +28,8 @@ function prompt {
 
     if ($isAdmin) {
         $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $highVoltage
-    } else {
+    }
+    else {
         $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object '💩'
     }
 
@@ -58,6 +59,46 @@ function prompt {
 
     $LASTEXITCODE = $origLastExitCode
     $prompt
+}
+
+function SplitIntoArgs {
+    param (
+        [Parameter(Mandatory = $true)][string]$arguments
+    )
+
+    # https://stackoverflow.com/a/366532
+    $match = "[^\s`"']+|`"([^`"]*)`"|'([^']*)'"
+    $regex = [System.Text.RegularExpressions.Regex]::new($match)
+    $regexMatches = $regex.Matches($arguments)
+    $result = [System.Collections.Generic.List[string]]::new()
+    foreach ($regexMatch in $regexMatches) {
+        $item = $regexMatch.Value.Trim([char[]]@('"', "`'"))
+        $result.Add($item)
+    }
+    return $result
+}
+
+# PowerShell is annoying about function results. If you run an exe directly  in your function
+# and that thing outputs to the console, that all becomes part of your function result.
+# You usually still want the output displayed on the conosle so pipeing to Out-Null
+# isn't an option. Out-Default seems to strip away color. So just delegate to here and run
+# through Start-Process.
+# https://stackoverflow.com/a/10288256
+function RunAndThrowOnNonZero {
+    param (
+        [Parameter(Mandatory = $true)][string]$arguments,
+        [Parameter(Mandatory = $false)][bool]$shouldThrow = $false
+    )
+
+    $parsedArgs = SplitIntoArgs -arguments $arguments 
+    $exeName = $parsedArgs[0]
+    $restOfArgs = $parsedArgs[1..$parsedArgs.Length]
+    $proccess = Start-Process -FilePath $exeName -ArgumentList $restOfArgs -PassThru -NoNewWindow
+    $proccess | Wait-Process
+
+    if ($shouldThrow -and $proccess.ExitCode -ne 0) {
+        throw "$exeName exited with $($proccess.ExitCode)"
+    }
 }
 
 function CreateDynamicAlias() {
@@ -91,12 +132,12 @@ function Invoke-GitPush {
 
     $aheadBy = (Get-GitStatus -Force).AheadBy
 
-    if($null -eq $aheadBy) {
+    if ($null -eq $aheadBy) {
         Write-Error "Can't push when you're not in a repo..."
         return
     }
 
-    if($aheadBy -gt 0){
+    if ($aheadBy -gt 0) {
         git push
         return
     }
@@ -158,6 +199,10 @@ function Invoke-FetchPull {
     if ($status = Get-GitStatus -Force) {
         $upstreamParts = $status.Upstream.Split('/', 2)
 
+        if ($null -eq $status.Upstream) {
+            throw 'Current upstream is not set, so cannot figure out remote'
+        }
+
         if ($null -eq $upstreamParts -or 2 -ne $upstreamParts.Count) {
             throw "Couldn't figure out upstream"
         }
@@ -182,7 +227,7 @@ function Invoke-FetchPull {
             Default { throw "Dunno what to do with $targetBranch" }
         }
 
-        git.exe $action $remote $branchName
+        RunAndThrowOnNonZero -arguments "git.exe $action $remote $branchName" -shouldThrow $true
     }
     else {
         Write-NonTerminatingError "This isn't a git repo..."
