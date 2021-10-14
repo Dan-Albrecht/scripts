@@ -5,12 +5,12 @@ enum TargetBranch {
 
 class PromptSettings {
     
-    [System.Collections.Generic.SortedDictionary[String,string]]$Aliases
+    [System.Collections.Generic.SortedDictionary[String, string]]$Aliases
 
     [ValidateNotNullOrEmpty()][string]$SettingsFile
 
     PromptSettings() {
-        $this.Aliases = [System.Collections.Generic.SortedDictionary[String,string]]::new()
+        $this.Aliases = [System.Collections.Generic.SortedDictionary[String, string]]::new()
         $this.SettingsFile = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\..\repoSettings.json")
     }
 }
