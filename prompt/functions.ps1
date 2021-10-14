@@ -137,12 +137,12 @@ function Invoke-GitPush {
         return
     }
 
-    if ($aheadBy -gt 0) {
-        git push
-        return
-    }
-
     if ([string]::IsNullOrWhiteSpace($commitMessage)) {
+        if ($aheadBy -gt 0) {
+            git push
+            return
+        }
+        
         $commitMessage = Read-Host 'Commit message'
     }
 
@@ -276,9 +276,10 @@ function Get-AliasEx {
         }
         else {
             $normalAlias = Get-Alias -Name $alias -ErrorAction Ignore
-            if($null -ne $normalAlias) {
+            if ($null -ne $normalAlias) {
                 $normalAlias
-            } else {
+            }
+            else {
                 Write-NonTerminatingError "There is no alias called $alias, you dingus"
             }
         }        
