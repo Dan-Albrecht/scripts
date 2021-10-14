@@ -122,7 +122,7 @@ function CreateDynamicAlias() {
     # Get rid of anything that might have been here before us. Usually this is annoying PowerShell builtins.
     Remove-Alias -Name $name -Force -ErrorAction Ignore
     Set-Alias -Name $name -Value $functionName -Scope Global
-    $PromptSettings.Aliases.Add("$name -> $action")
+    $PromptSettings.Aliases.Add($name, $action)
 }
 
 function Invoke-GitPush {
@@ -252,13 +252,37 @@ function Invoke-WithErrorHandling {
 }
 
 function Get-AliasEx {
-    Get-Alias
-    Write-Host
-    Write-Host 'Cool aliases'
-    Write-Host '============'
-    foreach ($alias in $PromptSettings.Aliases) {
-        Write-Host $alias
+    param (
+        [Parameter(Mandatory = $false)][string]$alias
+    )
+
+    if ([string]::IsNullOrWhiteSpace($alias)) {
+
+        # We skip of our aliases here because most of them will just say they map to guids
+        # When we enumerate our list we'll print what we're actually mapping them to
+        [string[]]$ourAliases = $PromptSettings.Aliases.Keys | Out-String -Stream
+        Get-Alias -Exclude $ourAliases
+        Write-Host
+        Write-Host 'Cool aliases'
+        Write-Host '============'
+        foreach ($item in $PromptSettings.Aliases.GetEnumerator()) {
+            Write-Host "$($item.Key) -> $($item.Value)"
+        }
     }
+    else {
+        [string]$foundAlias = $null
+        if ($PromptSettings.Aliases.TryGetValue($alias, [ref]$foundAlias)) {
+            Write-Host "$alias -> $foundAlias"
+        }
+        else {
+            $normalAlias = Get-Alias -Name $alias -ErrorAction Ignore
+            if($null -ne $normalAlias) {
+                $normalAlias
+            } else {
+                Write-NonTerminatingError "There is no alias called $alias, you dingus"
+            }
+        }        
+    }    
 }
 
 function Write-NonTerminatingError {
