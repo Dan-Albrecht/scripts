@@ -50,12 +50,18 @@ if (Test-Path -Path $vsWherePath) {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
             $vsToolsDisplayName = & $vsWherePath -prerelease -latest -all -property catalog_productDisplayVersion 
         }
-        Write-Host 'Loading VS module...' -NoNewline
-        $vsModule = (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
+
+        Write-Host 'Find VS module...' -NoNewline
+        . TimeCommand {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+            $vsModule = (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
+        }
+
         if ($null -eq $vsModule) {
             Write-Host 'VS module not found'
         }
         else {
+            Write-Host 'Loading it...' -NoNewline
             . TimeCommand { Import-Module $vsModule }
             Write-Host 'Loading dev shell...' -NoNewline
             . TimeCommand { Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null }
