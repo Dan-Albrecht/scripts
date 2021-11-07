@@ -63,7 +63,8 @@ function prompt {
 
 function SplitIntoArgs {
     param (
-        [Parameter(Mandatory = $true)][string]$arguments
+        [Parameter(Mandatory = $true)][string]$arguments,
+        [Parameter(Mandatory = $true)][bool]$stripQuotes
     )
 
     # https://stackoverflow.com/a/366532
@@ -72,7 +73,12 @@ function SplitIntoArgs {
     $regexMatches = $regex.Matches($arguments)
     $result = [System.Collections.Generic.List[string]]::new()
     foreach ($regexMatch in $regexMatches) {
-        $item = $regexMatch.Value.Trim([char[]]@('"', "`'"))
+        if ($stripQuotes) {
+            $item = $regexMatch.Value.Trim([char[]]@('"', "`'"))
+        }
+        else {
+            $item = $regexMatch.Value
+        }
         $result.Add($item)
     }
     return $result
@@ -90,9 +96,10 @@ function RunAndThrowOnNonZero {
         [Parameter(Mandatory = $false)][bool]$shouldThrow = $false
     )
 
-    $parsedArgs = SplitIntoArgs -arguments $arguments 
+    $parsedArgs = SplitIntoArgs -arguments $arguments -stripQuotes $false
     $exeName = $parsedArgs[0]
     $restOfArgs = $parsedArgs[1..$parsedArgs.Length]
+    
     $proccess = Start-Process -FilePath $exeName -ArgumentList $restOfArgs -PassThru -NoNewWindow
     $proccess | Wait-Process
 
@@ -142,28 +149,48 @@ function Invoke-GitPush {
             git push
             return
         }
-        
+
         $commitMessage = Read-Host 'Commit message'
+        if ([string]::IsNullOrWhiteSpace($commitMessage)) {
+            Write-Host 'Giving up...'
+        }
     }
 
-    if ([string]::IsNullOrWhiteSpace($commitMessage)) {
-        Write-Host 'Giving up...'
-    }
-    else {
-        git add .
-        git commit -m "$commitMessage"
-        git push
-    }
+    RunAndThrowOnNonZero -arguments "git add ." -shouldThrow $true
+    RunAndThrowOnNonZero -arguments "git commit -m `"$commitMessage`""
+    RunAndThrowOnNonZero -arguments "git push" -shouldThrow $true
 }
 
 function Invoke-CheckPowerShell {
     param ()
+    
+    $installed = $PSVersionTable.PSVersion
+
+    if (-not [string]::IsNullOrEmpty($installed.BuildLabel)) {
+        Write-Warning "You seem to be running a private build of PowerShell. Don't know how to check for updates for that"
+        return
+    }
 
     # https://github.com/PowerShell/PowerShell/blob/master/tools/install-powershell.ps1
     $metadata = Invoke-RestMethod https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json
-    $release = $metadata.ReleaseTag -replace '^v'
-    $release = [System.Management.Automation.SemanticVersion]::new($release)
-    $installed = $PSVersionTable.PSVersion
+    
+    if (-not [string]::IsNullOrEmpty($installed.PreReleaseLabel)) {
+        $release = $metadata.PreviewReleaseTag -replace '^v'
+        $release = [System.Management.Automation.SemanticVersion]::new($release)
+
+        # Mainline may get ahead of preview, so double check
+        $mainLineRelease = $metadata.ReleaseTag -replace '^v'
+        $mainLineRelease = [System.Management.Automation.SemanticVersion]::new($mainLineRelease)        
+
+        if ($mainLineRelease -gt $release) {
+            Write-Warning "You're running preview $release, but mainline is ahead at $mainLineRelease. Consider moving to mainline again or validate preview builds are still shipped the same way as ever."
+            $release = $mainLineRelease
+        }
+    }
+    else {
+        $release = $metadata.ReleaseTag -replace '^v'
+        $release = [System.Management.Automation.SemanticVersion]::new($release)        
+    }
 
     if ($installed -lt $release) {
         $packageName = "PowerShell-${release}-win-x64.msi"
@@ -185,9 +212,8 @@ function Invoke-CheckPowerShell {
         }
     }
     elseif ($installed -gt $release) {
-        Write-Warning "You're running a future version?"
+        Write-Warning "You're running a future version of PowerShell?"
     }
-
 }
 
 function Invoke-FetchPull {

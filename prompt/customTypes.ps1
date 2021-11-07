@@ -59,7 +59,7 @@ class RepoSettings {
         }
         else {
             $allText = Get-Content -Path $settingsFile
-            $settings = [System.Text.Json.JsonSerializer]::Deserialize($allText, [RepoSettings[]], $null)
+            $settings = [System.Text.Json.JsonSerializer]::Deserialize($allText, [RepoSettings[]], [System.Text.Json.JsonSerializerOptions]$null)
             return $settings
         }
     }
