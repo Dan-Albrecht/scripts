@@ -205,7 +205,8 @@ function Invoke-CheckPowerShell {
             $null = New-Item -ItemType Directory -Path $tempDir
             $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
             Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath
-            Start-Process $packagePath -Wait
+            Start-Process $packagePath
+            Write-Warning "Installer running, you should close all windows so it can update without reboot"
         }
         else {
             Write-Host 'Loser'
