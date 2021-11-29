@@ -132,6 +132,25 @@ function CreateDynamicAlias() {
     $PromptSettings.Aliases.Add($name, $action)
 }
 
+function Test-SearchPath {
+    param (
+        [Parameter(Mandatory = $true)][string]$search
+    )
+
+    where.exe /Q $search | Out-Null
+    $whereResult = $LASTEXITCODE
+    
+    # Where uses exit codes to return what it found. We don't need this to propagate outside of this function.
+    $Global:LASTEXITCODE = 0
+
+    if ($whereResult -eq 0) {
+        return $true
+    }
+    else {
+        return $false
+    }
+}
+
 function Invoke-GitPush {
     param (
         [Parameter(Mandatory = $false)][string]$commitMessage

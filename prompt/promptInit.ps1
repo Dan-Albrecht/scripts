@@ -29,7 +29,6 @@ function RelaunchMe { exit $relaunchMeExitCode }
 Set-Alias -Name 're' -Value 'RelaunchMe'
 
 $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
-$debuggersPath = 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64'
 
 . $PSScriptRoot\customTypes.ps1
 . $PSScriptRoot\functions.ps1
@@ -71,13 +70,6 @@ if (Test-Path -Path $vsWherePath) {
 }
 else {
     Write-Warning "VS was not found so you're not gonna have (m)any build tools"
-}
-
-if (Test-Path -Path $debuggersPath) {
-    $env:Path += ";$debuggersPath"
-}
-else {
-    Write-Warning 'No debugger tools found. Stuff like kill will likely be missing.'
 }
 
 # Stop PowerShell from camping on exes we care about
@@ -130,6 +122,10 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     else {
         Write-Error "Stage2 script $stage2Script doesn't exist"
     }
+}
+
+if (!(Test-SearchPath -search "kill")) {
+    Write-Warning "Kill command not found; update your path"
 }
 
 Invoke-CheckPowerShell
