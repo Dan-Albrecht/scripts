@@ -175,9 +175,9 @@ function Invoke-GitPush {
         }
     }
 
-    RunAndThrowOnNonZero -arguments "git add ." -shouldThrow $true
+    RunAndThrowOnNonZero -arguments 'git add .' -shouldThrow $true
     RunAndThrowOnNonZero -arguments "git commit -m `"$commitMessage`""
-    RunAndThrowOnNonZero -arguments "git push" -shouldThrow $true
+    RunAndThrowOnNonZero -arguments 'git push' -shouldThrow $true
 }
 
 function Invoke-CheckPowerShell {
@@ -190,8 +190,14 @@ function Invoke-CheckPowerShell {
         return
     }
 
-    # https://github.com/PowerShell/PowerShell/blob/master/tools/install-powershell.ps1
-    $metadata = Invoke-RestMethod https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json
+    try {
+        # https://github.com/PowerShell/PowerShell/blob/master/tools/install-powershell.ps1
+        $metadata = Invoke-RestMethod -Uri https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json -TimeoutSec 5
+    }
+    catch {
+        Write-Warning "Couldn't check latest PowerShell. Are you online?"
+        return
+    }    
     
     if (-not [string]::IsNullOrEmpty($installed.PreReleaseLabel)) {
         $release = $metadata.PreviewReleaseTag -replace '^v'
@@ -223,9 +229,16 @@ function Invoke-CheckPowerShell {
             $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
             $null = New-Item -ItemType Directory -Path $tempDir
             $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
-            Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath
+            try {
+                Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5    
+            }
+            catch {
+                Write-Warning 'Failed to start download, did you go offline?'
+                return
+            }
+            
             Start-Process $packagePath
-            Write-Warning "Installer running, you should close all windows so it can update without reboot"
+            Write-Warning 'Installer running, you should close all windows so it can update without reboot'
         }
         else {
             Write-Host 'Loser'
