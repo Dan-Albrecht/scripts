@@ -117,6 +117,13 @@ if ($IsWindows) {
     Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
 }
 
+if ($IsLinux) {
+    # $env:GIT_TRACE = 1
+
+    # This is needed to get GPG to properly prompt for signing passphrase
+    $env:GPG_TTY = tty
+}
+
 if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     if (Test-Path -Path $stage2Script) {
         Write-Host "Chaining to $stage2Script..."
