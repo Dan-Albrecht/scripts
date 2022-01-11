@@ -111,8 +111,11 @@ Import-ModuleEx -name 'posh-git' -version '1.0.0'
 
 $env:RUST_BACKTRACE = 1
 
-# BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
-Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
+if ($IsWindows) {
+    # BUGBUG: We want to check the terminal, not the OS we're actually running on
+    # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
+    Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
+}
 
 if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     if (Test-Path -Path $stage2Script) {
@@ -124,8 +127,8 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     }
 }
 
-if (!(Test-SearchPath -search "kill")) {
-    Write-Warning "Kill command not found; update your path"
+if (!(Test-SearchPath -search 'kill')) {
+    Write-Warning 'Kill command not found; update your path'
 }
 
 Invoke-CheckPowerShell
