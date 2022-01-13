@@ -122,6 +122,35 @@ if ($IsLinux) {
 
     # This is needed to get GPG to properly prompt for signing passphrase
     $env:GPG_TTY = tty
+
+    $ExecutionContext.InvokeCommand.CommandNotFoundAction =
+    {
+        param(
+            [string]
+            $commandName,
+    
+            [System.Management.Automation.CommandLookupEventArgs]
+            $commandArgs
+        )
+
+        # For a reason I haven't bothered to lookup yet, PowerShell seems to search twice for commands:
+        # the first time is with a "get-" prefix and the second time is just the actual command.
+        # Just hook the first one and if something has changed print a warning.
+        if ($commandName -ne $null -and $commandName.StartsWith('get-')) {
+            $commandName = $commandName.Substring(4)
+
+            # This seems to have no impact (and most examples say as such too), but if it ever gets fixed one day, be ready...
+            $commandArgs.StopSearch = $false
+            $commandArgs.CommandScriptBlock = {
+
+                # This is the thing that gives the suggestions about what potential package to install via apt to resolve a missing command
+                /usr/lib/command-not-found $commandName
+            }.GetNewClosure()
+        }
+        else {
+            Write-Warning "Incoming command $commandName didn't have the expected 'get-' prefix. Error handler may need to be updated."
+        }
+    } 
 }
 
 if (![string]::IsNullOrWhiteSpace($stage2Script)) {
