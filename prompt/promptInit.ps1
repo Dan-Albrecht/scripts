@@ -104,6 +104,10 @@ CreateDynamicAlias -name 'rs' -action "code $($PromptSettings.SettingsFile)"
 CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
+if ($IsLinux) {
+    CreateDynamicAlias -name 'where' -action "which `$args"
+}
+
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
