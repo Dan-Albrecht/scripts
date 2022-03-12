@@ -64,7 +64,8 @@ function prompt {
         $prompt += "`n"
 
         $LASTEXITCODE = $origLastExitCode
-        $prompt
+        # "⧸ " + $prompt + "⧹ "
+        "▕▔ " + $prompt + "▕▁ "
     }
     catch {
         Write-Host 'Prompt screwed up with:'
