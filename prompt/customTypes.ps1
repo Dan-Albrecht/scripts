@@ -34,7 +34,7 @@ class RepoSettings {
         $expectedTypeStartsWith = 'System.Text.Json.Serialization.'
 
         if ($false -eq $typeName.StartsWith($expectedTypeStartsWith)) {
-            Write-Error "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
+            Write-TerminatingError "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
         }
     }
 
@@ -52,10 +52,10 @@ class RepoSettings {
             
             $example = [RepoSettings]::GenerateExample()
             $message = "An example one for the current repo would look like:`n$example"
-            Write-NonTerminatingError $message
-            Write-Error '💩'
+            Write-TerminatingError $message
 
-            throw "Shouldn't have made it here"            
+            # TerminatingError should have terminated, but analyzer doesn't know that
+            throw "Shouldn't have reached here"
         }
         else {
             $allText = Get-Content -Path $settingsFile
@@ -79,7 +79,7 @@ class RepoSettings {
         # Output array should only have one line that is the repo, anything else and some assumption is wrong
         if ($output.Count -ne 1) {
             $output = $output | Out-String
-            Write-Error "Expected to get a single line of output, but got:`n$output"
+            Write-TerminatingError "Expected to get a single line of output, but got:`n$output"
         }
 
         # Aparently a string array of 1 item is/can be directly directed as just a plain string...
@@ -96,12 +96,11 @@ class RepoSettings {
         if ($null -eq $currentSettings) {
             $example = [RepoSettings]::GenerateExample()
             Write-NonTerminatingError "Current repo doesn't exist in repo settings file at $settingsFile"
-            Write-NonTerminatingError "Add an entry like the following to it:`n$example"
-            Write-Error '💩'
+            Write-TerminatingError "Add an entry like the following to it:`n$example"
         }
 
         if ($currentSettings.Count -ne 1) {
-            Write-Error "Settings file $settingsFile seems to have multiple entries for repo at $currentRoot"
+            Write-TerminatingError "Settings file $settingsFile seems to have multiple entries for repo at $currentRoot"
         }
 
         return $currentSettings

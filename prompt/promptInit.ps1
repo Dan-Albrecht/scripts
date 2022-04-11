@@ -86,6 +86,8 @@ CreateDynamicAlias -name '...' -action 'Set-Location -Path ..\..'
 CreateDynamicAlias -name '....' -action 'Set-Location -Path ..\..\..'
 CreateDynamicAlias -name '.....' -action 'Set-Location -Path ..\..\..\..'
 CreateDynamicAlias -name 'cr' -action 'cargo run'
+CreateDynamicAlias -name 'db' -action "dotnet build `$args[0] --no-restore --configuration Debug -p:Platform=x64"
+CreateDynamicAlias -name 'dr' -action "dotnet restore `$args[0] --interactive"
 CreateDynamicAlias -name 'dir' -action 'cmd /c dir' -allowArgs
 CreateDynamicAlias -name 'fm' -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Default'
 CreateDynamicAlias -name 'fu' -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Upstream'
@@ -163,7 +165,7 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
         . $stage2Script
     }
     else {
-        Write-Error "Stage2 script $stage2Script doesn't exist"
+        Write-TerminatingError "Stage2 script $stage2Script doesn't exist"
     }
 }
 

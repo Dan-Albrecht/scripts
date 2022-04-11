@@ -373,7 +373,9 @@ function Write-TerminatingError {
     # Don't want all the crap powershell would normally print out
     # $ErrorView = 'ConciseView' doesn't apply to scripts so
     # create a simple good enough one
-    Write-Host -ForegroundColor Red -Object $message
+    Write-Host -ForegroundColor DarkRed -Object $message
+    $details = '  => ' + $MyInvocation.ScriptName + '@' + $MyInvocation.ScriptLineNumber
+    Write-Host -ForegroundColor DarkGray -Object $details
     exit
 }
 
