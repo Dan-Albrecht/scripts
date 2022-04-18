@@ -113,7 +113,7 @@ if ($IsLinux) {
 Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
-Import-ModuleEx -name 'posh-git' -version '1.0.0'
+Import-ModuleEx -name 'posh-git' -version '1.1.0'
 
 $env:RUST_BACKTRACE = 1
 

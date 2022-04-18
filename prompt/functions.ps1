@@ -96,7 +96,7 @@ function SplitIntoArgs {
     return $result
 }
 
-# PowerShell is annoying about function results. If you run an exe directly  in your function
+# PowerShell is annoying about function results. If you run an exe directly in your function
 # and that thing outputs to the console, that all becomes part of your function result.
 # You usually still want the output displayed on the conosle so pipeing to Out-Null
 # isn't an option. Out-Default seems to strip away color. So just delegate to here and run
@@ -385,17 +385,49 @@ function Import-ModuleEx {
         [Parameter(Mandatory = $true)][string]$version
     )
 
+    $checkName = [System.IO.Path]::Combine($env:TMP, $name + ".check")
+    $threeDays = [timespan]::FromDays(3)
+    if (SomethingAboutTouching -filename $checkName -howLong $threeDays) {
+
+        Write-Host "Checking online for latest $name..." -NoNewline
+        . TimeCommand {
+            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+            $latestModuleInfo = Find-Module -name $name
+        }
+
+        # For now just assuming we always want latest
+        if ($latestModuleInfo.Version -ne $version) {
+            Write-Warning "$name appears to have an update. You requested $version, but $($latestModuleInfo.Version) is available. Install with:`nInstall-Module -Name $name -RequiredVersion $($latestModuleInfo.Version)"
+        }
+    }
+
     $modules = Get-Module -Name $name -ListAvailable   
     
     if ($null -eq $modules) {
         Write-TerminatingError "Module missing, run: Install-Module -Name $name -RequiredVersion $version"
     }
 
-    if ($null -eq ($modules.Version | Where-Object { $_ -eq $version })) {
+    $maxVersion = $null
+    $desiredVersion = [version]::Parse($version)
+    $didntFindDesiredVersion = $true
+    foreach ($module in $modules) {
+        if ($maxVersion -lt $module.Version) {
+            $maxVersion = $module.Version
+        }
+        if ($module.Version -eq $desiredVersion) {
+            $didntFindDesiredVersion = $false
+        }
+    }
+
+    if ($didntFindDesiredVersion) {
         $foundVersions = $modules.Version
         $foundVersions = [string]::Join(', ', $foundVersions)
         Write-NonTerminatingError "While loading $name expected to find version $version, but found $foundVersions."
         Write-TerminatingError "Update prompt settings or install via: Install-Module -Name $name -RequiredVersion $version"
+    }
+
+    if ($maxVersion -gt $desiredVersion) {
+        Write-Warning "By the way, you have version $maxVersion of $name installed, but you asked to load $desiredVersion. What's up with that?"
     }
 
     Import-Module -Name $name -RequiredVersion $version
@@ -432,4 +464,37 @@ function TimeCommand {
     $sw = $sw.ElapsedMilliseconds.ToString('N0')
     $sw = "Completed in $sw" + 'ms'
     Write-Host $sw
+}
+
+function TouchFile {
+    param (
+        [Parameter(Mandatory = $true)][string]$filename
+    )
+    
+    $file = Get-ChildItem -Path $filename -ErrorAction SilentlyContinue
+    if ($null -ne $file) {
+        $file.LastWriteTimeUtc = Get-Date -AsUTC
+    }
+    else {
+        New-Item -Path $filename | Out-Null
+    }
+}
+
+function SomethingAboutTouching {
+    param (
+        [Parameter(Mandatory = $true)][string]$filename,
+        [Parameter(Mandatory = $true)][timespan]$howLong
+    )
+
+    $file = Get-ChildItem -Path $filename -ErrorAction SilentlyContinue
+    if ($null -ne $file) {
+        $now = Get-Date -AsUTC
+        $leaveAloneUntil = $file.LastWriteTimeUtc + $howLong
+        if ($leaveAloneUntil -gt $now) {
+            return $false
+        }
+    }    
+
+    TouchFile -filename $filename
+    return $true
 }
