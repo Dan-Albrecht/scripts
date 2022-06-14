@@ -69,7 +69,7 @@ class RepoSettings {
         $example = [RepoSettings[]]@(
             [RepoSettings]::new($currentRoot, 'main')
         )
-        $example = [System.Text.Json.JsonSerializer]::Serialize($example, $null)
+        $example = [System.Text.Json.JsonSerializer]::Serialize($example, [System.Text.Json.JsonSerializerOptions]$null)
         return $example
     }
 
