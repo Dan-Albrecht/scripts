@@ -34,7 +34,7 @@ class RepoSettings {
         $expectedTypeStartsWith = 'System.Text.Json.Serialization.'
 
         if ($false -eq $typeName.StartsWith($expectedTypeStartsWith)) {
-            Write-TerminatingError "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
+            Write-Error "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
         }
     }
 
@@ -52,7 +52,7 @@ class RepoSettings {
             
             $example = [RepoSettings]::GenerateExample()
             $message = "An example one for the current repo would look like:`n$example"
-            Write-TerminatingError $message
+            Write-Error $message
 
             # TerminatingError should have terminated, but analyzer doesn't know that
             throw "Shouldn't have reached here"
@@ -79,7 +79,7 @@ class RepoSettings {
         # Output array should only have one line that is the repo, anything else and some assumption is wrong
         if ($output.Count -ne 1) {
             $output = $output | Out-String
-            Write-TerminatingError "Expected to get a single line of output, but got:`n$output"
+            Write-Error "Expected to get a single line of output, but got:`n$output"
         }
 
         # Aparently a string array of 1 item is/can be directly directed as just a plain string...
@@ -96,11 +96,11 @@ class RepoSettings {
         if ($null -eq $currentSettings) {
             $example = [RepoSettings]::GenerateExample()
             Write-NonTerminatingError "Current repo doesn't exist in repo settings file at $settingsFile"
-            Write-TerminatingError "Add an entry like the following to it:`n$example"
+            Write-Error "Add an entry like the following to it:`n$example"
         }
 
         if ($currentSettings.Count -ne 1) {
-            Write-TerminatingError "Settings file $settingsFile seems to have multiple entries for repo at $currentRoot"
+            Write-Error "Settings file $settingsFile seems to have multiple entries for repo at $currentRoot"
         }
 
         return $currentSettings

@@ -268,11 +268,12 @@ function Invoke-FetchPull {
     )
 
     if ($status = Get-GitStatus -Force) {
-        $upstreamParts = $status.Upstream.Split('/', 2)
-
+        
         if ($null -eq $status.Upstream) {
             throw 'Current upstream is not set, so cannot figure out remote'
         }
+
+        $upstreamParts = $status.Upstream.Split('/', 2)
 
         if ($null -eq $upstreamParts -or 2 -ne $upstreamParts.Count) {
             throw "Couldn't figure out upstream"
@@ -343,7 +344,7 @@ function Get-AliasEx {
     else {
         [string]$foundAlias = $null
         if ($PromptSettings.Aliases.TryGetValue($alias, [ref]$foundAlias)) {
-            Write-Host "$alias -> $foundAlias"
+            return "$alias -> $foundAlias"
         }
         else {
             $normalAlias = Get-Alias -Name $alias -ErrorAction Ignore
@@ -365,18 +366,52 @@ function Write-NonTerminatingError {
     Write-Host -ForegroundColor Red -Object $message
 }
 
-function Write-TerminatingError {
+function Format-ActuallyConcise {
+    [CmdletBinding()]
+    param(
+        [System.Management.Automation.ErrorRecord]$errorRecord
+    )
+
+    try {
+        $exceptionMessage = $errorRecord.Exception.Message
+        $st = $errorRecord.ScriptStackTrace
+        $split = $st.Split([System.Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
+        Write-Host -ForegroundColor Red -Object $exceptionMessage
+
+        foreach ($line in $split) {
+            if ($line -eq 'at <ScriptBlock>, <No file>: line 1') {
+                $line = 'The Console'
+            }
+            elseif ($line.StartsWith('at global:') -and $line.EndsWith(', <No file>: line 1')) {
+                $potentialAlias = $line.Replace('at global:', [string]$null).Replace(', <No file>: line 1', [string]$null)
+                $alias = Get-Alias -Definition $potentialAlias -ErrorAction SilentlyContinue
+                if ($null -ne $alias) {
+                    $ourAlias = Get-AliasEx -alias $alias.Name
+                    if ($null -ne $ourAlias) {
+                        $line = "The alias: $ourAlias"
+                    }
+                }
+            }
+
+            Write-Host -ForegroundColor DarkGray "  $line"
+        }
+    }
+    catch {
+        # Not sure if possible, but try and prevent recursive loop caused by outputting another ErrorRecord here
+        $message = $_.ToString()
+        Write-Host "Screwed up writing error: $message"
+    }
+}
+
+function Write-WarningEx {
     param (
         [Parameter(Mandatory = $true)][string]$message
     )
 
-    # Don't want all the crap powershell would normally print out
-    # $ErrorView = 'ConciseView' doesn't apply to scripts so
-    # create a simple good enough one
-    Write-Host -ForegroundColor DarkRed -Object $message
     $details = '  => ' + $MyInvocation.ScriptName + '@' + $MyInvocation.ScriptLineNumber
-    Write-Host -ForegroundColor DarkGray -Object $details
-    exit
+    $message += "`n$details"
+    Write-Host -ForegroundColor Yellow -Object $message
+
 }
 
 function Import-ModuleEx {
@@ -404,7 +439,7 @@ function Import-ModuleEx {
     $modules = Get-Module -Name $name -ListAvailable   
     
     if ($null -eq $modules) {
-        Write-TerminatingError "Module missing, run: Install-Module -Name $name -RequiredVersion $version"
+        Write-Error "Module missing, run: Install-Module -Name $name -RequiredVersion $version"
     }
 
     $maxVersion = $null
@@ -423,7 +458,7 @@ function Import-ModuleEx {
         $foundVersions = $modules.Version
         $foundVersions = [string]::Join(', ', $foundVersions)
         Write-NonTerminatingError "While loading $name expected to find version $version, but found $foundVersions."
-        Write-TerminatingError "Update prompt settings or install via: Install-Module -Name $name -RequiredVersion $version"
+        Write-Error "Update prompt settings or install via: Install-Module -Name $name -RequiredVersion $version"
     }
 
     if ($maxVersion -gt $desiredVersion) {

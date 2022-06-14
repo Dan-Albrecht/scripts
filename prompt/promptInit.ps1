@@ -34,6 +34,10 @@ $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere
 . $PSScriptRoot\functions.ps1
 $global:PromptSettings = [PromptSettings]::new()
 
+# Don't want all the crap PowerShell would normally print out
+# $ErrorView = 'ConciseView' doesn't apply to scripts so have to do a customer formatter
+Update-FormatData -PrependPath $PSScriptRoot\betterErrors.Format.ps1xml
+
 if (Test-Path -Path $vsWherePath) {
     Write-Host 'Getting VS install path...' -NoNewline
     . TimeCommand { 
@@ -165,7 +169,7 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
         . $stage2Script
     }
     else {
-        Write-TerminatingError "Stage2 script $stage2Script doesn't exist"
+        Write-Error "Stage2 script $stage2Script doesn't exist"
     }
 }
 
