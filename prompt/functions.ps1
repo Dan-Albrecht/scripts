@@ -65,7 +65,7 @@ function prompt {
 
         $LASTEXITCODE = $origLastExitCode
         # "⧸ " + $prompt + "⧹ "
-        "▕▔ " + $prompt + "▕▁ "
+        '▕▔ ' + $prompt + '▕▁ '
     }
     catch {
         Write-Host 'Prompt screwed up with:'
@@ -420,14 +420,14 @@ function Import-ModuleEx {
         [Parameter(Mandatory = $true)][string]$version
     )
 
-    $checkName = [System.IO.Path]::Combine($env:TMP, $name + ".check")
+    $checkName = [System.IO.Path]::Combine($env:TMP, $name + '.check')
     $threeDays = [timespan]::FromDays(3)
     if (SomethingAboutTouching -filename $checkName -howLong $threeDays) {
 
         Write-Host "Checking online for latest $name..." -NoNewline
         . TimeCommand {
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
-            $latestModuleInfo = Find-Module -name $name
+            $latestModuleInfo = Find-Module -Name $name
         }
 
         # For now just assuming we always want latest
@@ -532,4 +532,26 @@ function SomethingAboutTouching {
 
     TouchFile -filename $filename
     return $true
+}
+
+function Spin {
+    param (
+        [Parameter(Mandatory = $true)][int]$ticks
+    )
+    $now = [datetime]::UtcNow.Ticks
+    $end =  $now + $ticks
+    while ([datetime]::UtcNow.Ticks -le $end) {    
+    }    
+}
+
+function SlowPrintFile {
+    param (
+        [Parameter(Mandatory = $true)][string]$filename,
+        [Parameter(Mandatory = $false)][int]$delay = 200000
+    )
+    $lines = Get-Content -Path $filename
+    foreach ($line in $lines) {
+        Write-Host $line
+        Spin -ticks $delay
+    }
 }

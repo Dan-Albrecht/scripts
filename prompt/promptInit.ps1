@@ -104,6 +104,7 @@ CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targe
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
 CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
 CreateDynamicAlias -name 're' -action "exit $relaunchMeExitCode"
+CreateDynamicAlias -name 're2' -action ". $PSScriptRoot\customTypes.ps1; . $PSScriptRoot\functions.ps1"
 # We made it this far so clean up our temp function
 Remove-Item -Path Function:\RelaunchMe
 CreateDynamicAlias -name 'rs' -action "code $($PromptSettings.SettingsFile)"
@@ -118,6 +119,7 @@ Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
+Import-ModuleEx -name 'PSReadLine' -version '2.1.0'
 
 $env:RUST_BACKTRACE = 1
 
