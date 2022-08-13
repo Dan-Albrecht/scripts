@@ -119,7 +119,7 @@ Set-Location -Path $repoPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
-Import-ModuleEx -name 'PSReadLine' -version '2.1.0'
+Import-ModuleEx -name 'PSReadLine' -version '2.2.6'
 
 $env:RUST_BACKTRACE = 1
 
