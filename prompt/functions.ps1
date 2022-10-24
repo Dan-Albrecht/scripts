@@ -234,6 +234,7 @@ function Invoke-CheckPowerShell {
         $downloadURL = "https://github.com/PowerShell/PowerShell/releases/download/v${release}/${packageName}"
         
         Write-Host "PowerShell version $installed is out of date, update to ${release}:"
+        Write-Host "Release notes: https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
         Write-Host $downloadURL        
         $answer = Read-Host 'Do you want to install it now (y/n)'
         
