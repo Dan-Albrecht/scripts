@@ -444,7 +444,7 @@ function Import-ModuleEx {
     $modules = Get-Module -Name $name -ListAvailable   
     
     if ($null -eq $modules) {
-        Write-Error "Module missing, run: Install-Module -Name $name -RequiredVersion $version"
+        Write-Error "Module missing, run: Install-Module -Name $name -RequiredVersion $version`nRelease Details: https://www.powershellgallery.com/packages/$name/$version"
     }
 
     $maxVersion = $null
@@ -462,7 +462,7 @@ function Import-ModuleEx {
     if ($didntFindDesiredVersion) {
         $foundVersions = $modules.Version
         $foundVersions = [string]::Join(', ', $foundVersions)
-        Write-NonTerminatingError "While loading $name expected to find version $version, but found $foundVersions."
+        Write-NonTerminatingError "While loading $name expected to find version $version, but found $foundVersions.`nRelease Details: https://www.powershellgallery.com/packages/$name/$version"
         Write-Error "Update prompt settings or install via: Install-Module -Name $name -RequiredVersion $version"
     }
 
