@@ -65,12 +65,16 @@ function prompt {
 
         $LASTEXITCODE = $origLastExitCode
         # "⧸ " + $prompt + "⧹ "
-        '▕▔ ' + $prompt + '▕▁ '
+        $prompt = '▕▔ ' + $prompt + '▕▁ '
     }
     catch {
-        Write-Host 'Prompt screwed up with:'
-        Write-Host $Error[0]
+        $prompt = 'Prompt screwed up with: '
+        $prompt += $Error[0]
+        $prompt += "`n"
+        $prompt += 'Busted Prompt> '
     }
+
+    $prompt
 }
 
 function SplitIntoArgs {
