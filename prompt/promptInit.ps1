@@ -126,7 +126,7 @@ $env:RUST_BACKTRACE = 1
 if ($IsWindows) {
     # BUGBUG: We want to check the terminal, not the OS we're actually running on
     # BUGBUG: Figure out how to detect if we're actually currently rendering with this, not just installed
-    Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible.ttf' and set terminal font face to 'CaskaydiaCove NF.'"
+    Test-Font -name 'Caskaydia Cove Nerd Font Complete Windows Compatible Regular (TrueType)' -remediationInfo "Download 'Caskaydia Cove Nerd Font' from: https://www.nerdfonts.com/font-downloads and install 'Caskaydia Cove Nerd Font Complete Windows Compatible Regular.otf' and set terminal font face to 'CaskaydiaCove NF.'"
 }
 
 if ($IsLinux) {
