@@ -544,7 +544,7 @@ function Spin {
         [Parameter(Mandatory = $true)][int]$ticks
     )
     $now = [datetime]::UtcNow.Ticks
-    $end =  $now + $ticks
+    $end = $now + $ticks
     while ([datetime]::UtcNow.Ticks -le $end) {    
     }    
 }
@@ -558,5 +558,63 @@ function SlowPrintFile {
     foreach ($line in $lines) {
         Write-Host $line
         Spin -ticks $delay
+    }
+}
+
+function Stop-ProcessEx {
+    param (
+        [Parameter(Mandatory = $true)][string]$name,
+        [Parameter(Mandatory = $false)][bool]$forceKill = $false
+    )
+
+    # Need silent continue as finding nothing is an error according to this
+    $procs = Get-Process -Name $name -ErrorAction SilentlyContinue
+
+    if ($null -eq $procs -or $procs.Length -eq 0) {
+        Write-Warning 'Found nothing to kill'
+    }
+    else {
+        if ($forceKill) {
+            $procs | Stop-Process -Force
+        }
+        else {
+            $procs | Where-Object { $_.MainWindowHandle -ne [System.IntPtr]::Zero } | ForEach-Object { $_.CloseMainWindow() } | Out-Null
+
+            # Force is about killing another user's process, not about doing a nice shutdown
+            # Since these have no main window can't do graceful so just normal kill them
+            $procs | Where-Object { $_.MainWindowHandle -eq [System.IntPtr]::Zero } | ForEach-Object { Stop-Process $_ -Force } | Out-Null
+        }
+
+        $procs
+    }
+}
+
+function Stop-ProcessExWrapper {
+    param (
+        [Parameter(Mandatory = $false)][string[]]$args
+    )
+
+    if ($null -eq $args -or $args.Length -eq 0) {
+        Write-Error 'What, exactly, are you expecting me to kill?'
+    }
+    else {
+        $usage = 'Usage: [-f] <name>'
+
+        if ($args.Length -gt 2) {
+            Write-Error $usage
+        }
+        else {
+            if ($args.Length -eq 1) {
+                Stop-ProcessEx -name $args[0]
+            }
+            else {
+                if ($args[0] -ne '-f') {
+                    Write-Error $usage
+                }
+                else {
+                    Stop-ProcessEx -name $args[1] -forceKill $true
+                }
+            }
+        }
     }
 }

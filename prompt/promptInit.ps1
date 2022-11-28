@@ -96,6 +96,7 @@ CreateDynamicAlias -name 'dir' -action 'cmd /c dir' -allowArgs
 CreateDynamicAlias -name 'fm' -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Default'
 CreateDynamicAlias -name 'fu' -action 'Invoke-FetchPull -fetchOnly $true -targetBranch Upstream'
 CreateDynamicAlias -name 'gs' -action 'git status'
+CreateDynamicAlias -name 'kill' -action 'Stop-ProcessExWrapper' -allowArgs
 CreateDynamicAlias -name 'mp' -action "$PSScriptRoot\generatePrompt.ps1"
 CreateDynamicAlias -name 'n' -action "notepad.exe `$args"
 CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$repoPath'"
@@ -173,10 +174,6 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     else {
         Write-Error "Stage2 script $stage2Script doesn't exist"
     }
-}
-
-if (!(Test-SearchPath -search 'kill')) {
-    Write-Warning 'Kill command not found; update your path'
 }
 
 Invoke-CheckPowerShell
