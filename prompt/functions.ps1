@@ -618,3 +618,43 @@ function Stop-ProcessExWrapper {
         }
     }
 }
+
+function Format-File {
+    param (
+        [Parameter(Mandatory = $true)][string]$path
+    )
+
+    if (-not [System.IO.File]::Exists($path)) {
+        Write-Error "$path does not exist"
+    }
+
+    $lines = [string[]][System.IO.File]::ReadLines($path)
+    $indentCount = 0
+    $outStream = [System.IO.File]::Open($path, [System.IO.FileMode]::Truncate)
+    $outWriter = [System.IO.StreamWriter]::new($outStream)
+
+    foreach ($line in $lines) {
+        $line = $line.TrimStart()
+        
+        if ($line.Contains('}')) {
+            $indentCount--
+            if ($indentCount -lt 0) {
+                Write-Error "Went to negative indenting at line: $line"
+            }
+        }
+        
+        $formatedLine = ''
+        for ($i = 0; $i -lt $indentCount; $i++) {
+            $formatedLine += '  '
+        }
+        
+        $formatedLine += ($line + "`n")
+        $outWriter.Write($formatedLine)
+
+        if ($line.Contains('{')) {
+            $indentCount++
+        }
+    }
+    
+    $outWriter.Close()
+}
