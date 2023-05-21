@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name        Disable Squarespace Login
-// @namespace   https://github.com/Dan-Albrecht/miscellaneous
+// @namespace   https://github.com/Dan-Albrecht/scripts
 // @match       *://*/*
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Dan Albrecht
 // @description Disables the horribly annoying behavior of Squarespace sites redirecting to the login page on the press of the escape key. 
 // ==/UserScript==
