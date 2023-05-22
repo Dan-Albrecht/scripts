@@ -32,7 +32,7 @@ $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere
 
 . $PSScriptRoot\customTypes.ps1
 . $PSScriptRoot\functions.ps1
-$global:PromptSettings = [PromptSettings]::new()
+$global:PromptSettings = [PromptSettings]::new("$repoPath\..\repoSettings.json")
 
 # Don't want all the crap PowerShell would normally print out
 # $ErrorView = 'ConciseView' doesn't apply to scripts so have to do a customer formatter
@@ -104,11 +104,13 @@ CreateDynamicAlias -name 'nt2' -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
 CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
+CreateDynamicAlias -name 'rb' -action "Invoke-Rebase"
 CreateDynamicAlias -name 're' -action "exit $relaunchMeExitCode"
 CreateDynamicAlias -name 're2' -action ". $PSScriptRoot\customTypes.ps1; . $PSScriptRoot\functions.ps1"
 # We made it this far so clean up our temp function
 Remove-Item -Path Function:\RelaunchMe
 CreateDynamicAlias -name 'rs' -action "code $($PromptSettings.SettingsFile)"
+CreateDynamicAlias -name 'sq' -action "Invoke-Squash"
 CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 

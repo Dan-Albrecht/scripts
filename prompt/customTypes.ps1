@@ -9,9 +9,10 @@ class PromptSettings {
 
     [ValidateNotNullOrEmpty()][string]$SettingsFile
 
-    PromptSettings() {
+    PromptSettings([string]$settingsFile) {
         $this.Aliases = [System.Collections.Generic.SortedDictionary[String, string]]::new()
-        $this.SettingsFile = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\..\repoSettings.json")
+        Write-Host "Loading repo settings from $settingsFile"
+        $this.SettingsFile = [System.IO.Path]::GetFullPath($settingsFile)
     }
 }
 
@@ -31,10 +32,11 @@ class RepoSettings {
         $typeName = $method.DeclaringType.FullName
         # Seems like single object vs array will come in with different stack
         # so just look for the namespace subsring; good enough
-        $expectedTypeStartsWith = 'System.Text.Json.Serialization.'
+        $expectedTypeStartsWith = 'System.Text.Json.'
 
         if ($false -eq $typeName.StartsWith($expectedTypeStartsWith)) {
-            Write-Error "You're not allowed to call this; only deserializer is.`nYou: $typeName`nExpected: $expectedTypeStartsWith"
+            $you = $method.DeclaringType.AssemblyQualifiedName
+            Write-Error "You're not allowed to call this; only the deserializer is.`nYour Assembly: $you`nYour Type: $typeName`nExpected Type: $expectedTypeStartsWith"
         }
     }
 

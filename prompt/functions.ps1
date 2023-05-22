@@ -5,6 +5,7 @@ function prompt {
         $exitGlyph = [char]::ConvertFromUtf32(0xf705)
         $noGit = [char]::ConvertFromUtf32(0xf663)
         $highVoltage = [char]::ConvertFromUtf32(0x26a1)
+        $classicWindows = [char]::ConvertFromUtf32(0xF0A21)
         $origLastExitCode = $LASTEXITCODE
 
         # Could also names from https://www.w3schools.com/Colors/colors_names.asp
@@ -19,12 +20,12 @@ function prompt {
         $exitForeground = 'Black'
         $exitBackground = 'Yellow'
         $flameForeground = 'Red'
-        $flameBackground = 'Black'
 
         $date = Get-Date -Format '[HH:mm]'
         $prompt = ''
 
         if ($IsWindows) {
+            $prompt += Write-Prompt -Object ($classicWindows + " ")
             $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
             $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
@@ -60,7 +61,7 @@ function prompt {
 
         $prompt += Write-Prompt -ForegroundColor $gitStatusBackground -BackgroundColor $exitBackground -Object $triangleRight
         $prompt += Write-Prompt -ForegroundColor $exitForeground -BackgroundColor $exitBackground -Object "$exitGlyph $origLastExitCode "
-        $prompt += Write-Prompt -ForegroundColor $flameForeground -BackgroundColor $flameBackground -Object $rightFlame
+        $prompt += Write-Prompt -ForegroundColor $flameForeground -Object $rightFlame
         $prompt += "`n"
 
         $LASTEXITCODE = $origLastExitCode
@@ -312,6 +313,55 @@ function Invoke-FetchPull {
     
 }
 
+function Invoke-Rebase {
+    if ($status = Get-GitStatus -Force) {
+        
+        if ($null -eq $status.Upstream) {
+            throw 'Current upstream is not set, so cannot figure out remote'
+        }
+
+        $upstreamParts = $status.Upstream.Split('/', 2)
+
+        if ($null -eq $upstreamParts -or 2 -ne $upstreamParts.Count) {
+            throw "Couldn't figure out upstream"
+        }
+
+        $remote = $upstreamParts[0]
+        $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
+        $defaultBranch = $currentSettings.DefaultBranch
+
+        RunAndThrowOnNonZero -arguments "git.exe pull --rebase $remote $defaultBranch" -shouldThrow $true
+    }
+    else {
+        Write-NonTerminatingError "This isn't a git repo..."
+    }
+}
+
+function Invoke-Squash {
+    if ($status = Get-GitStatus -Force) {
+        
+        if ($null -eq $status.Upstream) {
+            throw 'Current upstream is not set, so cannot figure out remote'
+        }
+
+        $upstreamParts = $status.Upstream.Split('/', 2)
+
+        if ($null -eq $upstreamParts -or 2 -ne $upstreamParts.Count) {
+            throw "Couldn't figure out upstream"
+        }
+
+        $remote = $upstreamParts[0]
+        $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
+        $defaultBranch = $currentSettings.DefaultBranch
+
+        RunAndThrowOnNonZero -arguments "git.exe --soft $remote/$defaultBranch"
+        RunAndThrowOnNonZero -arguments "git.exe add --all"
+    }
+    else {
+        Write-NonTerminatingError "This isn't a git repo..."
+    }    
+}
+
 function Invoke-WithErrorHandling {
     param (
         [Parameter(Mandatory = $true)][string]$execString,
@@ -470,7 +520,10 @@ function Import-ModuleEx {
         Write-Warning "By the way, you have version $maxVersion of $name installed, but you asked to load $desiredVersion. What's up with that?"
     }
 
-    Import-Module -Name $name -RequiredVersion $version
+    Write-Host "Loading module $name..." -NoNewline
+    . TimeCommand {
+        Import-Module -Name $name -RequiredVersion $version -Verbose
+    }
 }
 
 function Test-Font {
