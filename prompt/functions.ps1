@@ -2,8 +2,8 @@ function prompt {
     try {
         $rightFlame = [char]::ConvertFromUtf32(0xe0c0)
         $triangleRight = [char]::ConvertFromUtf32(0xe0b0)
-        $exitGlyph = [char]::ConvertFromUtf32(0xf705)
-        $noGit = [char]::ConvertFromUtf32(0xf663)
+        $exitGlyph = [char]::ConvertFromUtf32(0xf05fc)
+        $noGit = [char]::ConvertFromUtf32(0xf0164)
         $highVoltage = [char]::ConvertFromUtf32(0x26a1)
         $classicWindows = [char]::ConvertFromUtf32(0xF0A21)
         $origLastExitCode = $LASTEXITCODE
