@@ -13,9 +13,11 @@ Full path to an optional second stage script to run after all other init complet
 #>
 
 param (
-    [Parameter(Mandatory = $true)][string]$repoPath, 
-    [Parameter(Mandatory = $true)][string]$repoName,
-    [Parameter(Mandatory = $false)][string]$stage2Script)
+    [Parameter(Mandatory = $true)][string]$repoPath 
+    ,[Parameter(Mandatory = $true)][string]$repoName
+    ,[Parameter(Mandatory = $false)][string]$stage2Script
+    ,[Parameter(Mandatory = $false)][string]$rootPath
+    )
 
 $ErrorActionPreference = 'Stop'
 
@@ -29,8 +31,13 @@ Write-Host "We'll be using $powerShellPath for our child shell"
 
 $magicExitCode = 27
 $scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\promptInit.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
+
 if(![string]::IsNullOrWhiteSpace($stage2Script)){
     $scriptArgs += @('-stage2Script', $stage2Script)
+}
+
+if(![string]::IsNullOrWhiteSpace($rootPath)){
+    $scriptArgs += @('-rootPath', $rootPath)
 }
 
 $loop = $false

@@ -16,10 +16,12 @@ Full path to an optional second stage script to run after all other init complet
 #>
 
 param (
-    [Parameter(Mandatory = $true)][string]$repoPath, 
-    [Parameter(Mandatory = $true)][string]$repoName,
-    [Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0,
-    [Parameter(Mandatory = $false)][string]$stage2Script)
+    [Parameter(Mandatory = $true)][string]$repoPath 
+    ,[Parameter(Mandatory = $true)][string]$repoName
+    ,[Parameter(Mandatory = $false)][int]$relaunchMeExitCode = 0
+    ,[Parameter(Mandatory = $false)][string]$stage2Script
+    ,[Parameter(Mandatory = $false)][string]$rootPath
+    )
 
 $ErrorActionPreference = 'Stop'
 
@@ -27,6 +29,10 @@ $ErrorActionPreference = 'Stop'
 # We'll override with our style if we make it that far in init
 function RelaunchMe { exit $relaunchMeExitCode }
 Set-Alias -Name 're' -Value 'RelaunchMe'
+
+if([string]::IsNullOrWhiteSpace($rootPath)){
+    $rootPath = $repoPath
+}
 
 $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
 
@@ -99,7 +105,7 @@ CreateDynamicAlias -name 'gs' -action 'git status'
 CreateDynamicAlias -name 'kill' -action 'Stop-ProcessExWrapper' -allowArgs
 CreateDynamicAlias -name 'mp' -action "$PSScriptRoot\generatePrompt.ps1"
 CreateDynamicAlias -name 'n' -action "notepad.exe `$args"
-CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$repoPath'"
+CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$rootPath'"
 CreateDynamicAlias -name 'nt2' -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
@@ -118,7 +124,7 @@ if ($IsLinux) {
     CreateDynamicAlias -name 'where' -action "which `$args"
 }
 
-Set-Location -Path $repoPath
+Set-Location -Path $rootPath
 $Host.UI.RawUI.WindowTitle = $repoName
 
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
@@ -171,7 +177,7 @@ if ($IsLinux) {
 if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     if (Test-Path -Path $stage2Script) {
         Write-Host "Chaining to $stage2Script..."
-        . $stage2Script
+        . $stage2Script -rootPath $rootPath
     }
     else {
         Write-Error "Stage2 script $stage2Script doesn't exist"
