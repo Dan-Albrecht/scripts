@@ -461,12 +461,15 @@ function Format-ActuallyConcise {
 function Write-WarningEx {
     param (
         [Parameter(Mandatory = $true)][string]$message
+        , [Parameter(Mandatory = $false)][bool]$showStack = $true
     )
 
-    $details = '  => ' + $MyInvocation.ScriptName + '@' + $MyInvocation.ScriptLineNumber
-    $message += "`n$details"
-    Write-Host -ForegroundColor Yellow -Object $message
+    if ($showStack) {
+        $details = '  => ' + $MyInvocation.ScriptName + '@' + $MyInvocation.ScriptLineNumber
+        $message += "`n$details"
+    }
 
+    Write-Host -ForegroundColor Yellow -Object $message
 }
 
 function Import-ModuleEx {
@@ -522,7 +525,7 @@ function Import-ModuleEx {
 
     Write-Host "Loading module $name..." -NoNewline
     . TimeCommand {
-        Import-Module -Name $name -RequiredVersion $version -Verbose
+        Import-Module -Name $name -RequiredVersion $version
     }
 }
 
