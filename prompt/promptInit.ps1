@@ -25,6 +25,9 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', "New preference variable editor doesn't know yet")]
+$PSNativeCommandUseErrorActionPreference = $false
+
 # Set this immeidately with the builtin syntax incase we have any errors
 # We'll override with our style if we make it that far in init
 function RelaunchMe { exit $relaunchMeExitCode }
@@ -135,10 +138,10 @@ if ($IsLinux) {
 }
 
 Set-Location -Path $rootPath
-$Host.UI.RawUI.WindowTitle = $repoName
+$Host.UI.RawUI.WindowTitle = $xrepoName
 
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
-Import-ModuleEx -name 'PSReadLine' -version '2.2.6'
+Import-ModuleEx -name 'PSReadLine' -version '2.3.4' -potentialReleaseNotes 'https://github.com/PowerShell/PSReadLine/releases'
 
 $env:RUST_BACKTRACE = 1
 

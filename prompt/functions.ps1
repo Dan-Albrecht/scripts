@@ -475,7 +475,8 @@ function Write-WarningEx {
 function Import-ModuleEx {
     param (
         [Parameter(Mandatory = $true)][string]$name,
-        [Parameter(Mandatory = $true)][string]$version
+        [Parameter(Mandatory = $true)][string]$version,
+        [Parameter(Mandatory = $false)][string]$potentialReleaseNotes
     )
 
     $checkName = [System.IO.Path]::Combine($env:TMP, $name + '.check')
@@ -491,6 +492,10 @@ function Import-ModuleEx {
         # For now just assuming we always want latest
         if ($latestModuleInfo.Version -ne $version) {
             Write-Warning "$name appears to have an update. You requested $version, but $($latestModuleInfo.Version) is available. Install with:`nInstall-Module -Name $name -RequiredVersion $($latestModuleInfo.Version)"
+
+            if ($null -ne $potentialReleaseNotes) {
+                Write-Host "Release notes may be avilable at: $potentialReleaseNotes"
+            }
         }
     }
 
