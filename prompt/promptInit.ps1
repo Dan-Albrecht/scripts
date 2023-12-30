@@ -43,16 +43,6 @@ $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere
 . $PSScriptRoot\functions.ps1
 $global:PromptSettings = [PromptSettings]::new("$repoPath\..\repoSettings.json")
 
-# https://github.com/PowerShell/PowerShell/issues/1908#issuecomment-1577142452
-# https://github.com/PowerShell/PowerShell/pull/17857
-# https://github.com/PowerShell/PowerShell/commit/2424ad83aa4d44fe9e8f507485744e00c66cde58
-if ($null -eq (Get-ExperimentalFeature -Name PSNativeCommandPreserveBytePipe).Enabled) {
-    Write-WarningEx -message 'PSNativeCommandPreserveBytePipe feature does not appear to exist. Update to the latest preview to get proper pipelines.' -showStack $false
-}
-elseif ($false -eq (Get-ExperimentalFeature -Name PSNativeCommandPreserveBytePipe).Enabled) {
-    Write-WarningEx -message 'PSNativeCommandPreserveBytePipe is set to false...' -showStack $false
-}
-
 # Don't want all the crap PowerShell would normally print out
 # $ErrorView = 'ConciseView' doesn't apply to scripts so have to do a customer formatter
 Update-FormatData -PrependPath $PSScriptRoot\betterErrors.Format.ps1xml
