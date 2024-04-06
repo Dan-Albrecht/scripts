@@ -4,7 +4,7 @@
 // @match       https://www.reddit.com/*
 // @run-at      document-start
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Dan Albrecht
 // @description Redirects to old reddit
 // ==/UserScript==
@@ -15,6 +15,8 @@ if (window.top === window.self) {
   if (window.self.location.origin === expectedOrigin) {
     if (window.self.location.pathname !== null && (window.self.location.pathname.startsWith("/gallery/") || window.self.location.pathname === "/gallery")) {
       console.log("No Old reddit site for galleries :'(")
+    } else if (window.self.location.pathname === "/media") {
+      console.log("No Old reddit site for media :'(")
     } else {
       var old = window.self.location.toString().replace(window.self.location.origin, "https://old.reddit.com")
       window.self.location.replace(old)
