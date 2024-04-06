@@ -556,6 +556,7 @@ function Test-Font {
 function TimeCommand {
     param (
         [Parameter(Mandatory = $true)][ScriptBlock]$scriptBlock
+        ,[Parameter(Mandatory = $false)][string]$message
     )
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
@@ -563,7 +564,7 @@ function TimeCommand {
     $sw.Stop()
 
     $sw = $sw.ElapsedMilliseconds.ToString('N0')
-    $sw = "Completed in $sw" + 'ms'
+    $sw = "$message Completed in $sw" + 'ms'
     Write-Host $sw
 }
 

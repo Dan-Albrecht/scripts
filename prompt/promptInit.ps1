@@ -131,7 +131,7 @@ Set-Location -Path $rootPath
 $Host.UI.RawUI.WindowTitle = $xrepoName
 
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
-Import-ModuleEx -name 'PSReadLine' -version '2.3.4' -potentialReleaseNotes 'https://github.com/PowerShell/PSReadLine/releases'
+Import-ModuleEx -name 'PSReadLine' -version '2.3.5' -potentialReleaseNotes 'https://github.com/PowerShell/PSReadLine/releases'
 
 $env:RUST_BACKTRACE = 1
 
