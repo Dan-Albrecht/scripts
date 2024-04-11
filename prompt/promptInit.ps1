@@ -188,3 +188,4 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
 }
 
 Invoke-CheckPowerShell
+Invoke-CheckRust

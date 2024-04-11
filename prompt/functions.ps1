@@ -267,6 +267,33 @@ function Invoke-CheckPowerShell {
     }
 }
 
+function Invoke-CheckRust {
+    param ()
+
+    if (-not (Test-SearchPath -search "rustup.exe")) {
+        Write-Error "rustup.exe not intalled. Install from https://www.rust-lang.org/tools/install"
+        return
+    }
+
+    rustup.exe check | findstr.exe /sc:"Update available" | Out-Null
+    $lastExit = $LASTEXITCODE
+
+    if ($lastExit -eq 0) {
+        Write-Host "Rust needs an update:"
+        rustup.exe check
+        Write-Host "To update: rustup.exe update"
+    }
+    else {
+        Write-Host "Rust is up to date"
+    }
+
+    if (-not (Test-SearchPath -search "rg")) {
+        Write-Warning "ripgrep is not installed."
+        Write-Host "  To install: cargo install ripgrep -F pcre2"
+        return
+    }
+}
+
 function Invoke-FetchPull {
     param (
         [Parameter(Mandatory = $true)][bool]$fetchOnly,
@@ -556,7 +583,7 @@ function Test-Font {
 function TimeCommand {
     param (
         [Parameter(Mandatory = $true)][ScriptBlock]$scriptBlock
-        ,[Parameter(Mandatory = $false)][string]$message
+        , [Parameter(Mandatory = $false)][string]$message
     )
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
