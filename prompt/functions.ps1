@@ -21,7 +21,8 @@ function prompt {
         $exitBackground = 'Yellow'
         $flameForeground = 'Red'
 
-        $date = Get-Date -Format '[HH:mm]'
+        $date = Get-Date -Format '[HH:mm'
+        $date += (Get-Date -AsUTC -Format '/HH:mm') + 'z]'
         $prompt = ''
 
         if ($IsWindows) {
