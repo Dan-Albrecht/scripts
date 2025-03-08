@@ -41,7 +41,9 @@ $vsWherePath = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere
 
 . $PSScriptRoot\customTypes.ps1
 . $PSScriptRoot\functions.ps1
-$global:PromptSettings = [PromptSettings]::new("$repoPath\..\repoSettings.json")
+
+$settingsPath = Join-Path -Path $repoPath -ChildPath '..' -AdditionalChildPath 'repoSettings.json'
+$global:PromptSettings = [PromptSettings]::new($settingsPath)
 
 # Don't want all the crap PowerShell would normally print out
 # $ErrorView = 'ConciseView' doesn't apply to scripts so have to do a customer formatter
@@ -125,6 +127,8 @@ CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
 if ($IsLinux) {
     CreateDynamicAlias -name 'where' -action "which `$args"
+    CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
+    CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
 }
 
 Set-Location -Path $rootPath

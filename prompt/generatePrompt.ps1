@@ -11,7 +11,8 @@ if (![string]::IsNullOrWhiteSpace($gitOutput)) {
     $currentRepo = [System.IO.Path]::GetFullPath($gitOutput)
 }
 
-$result = "$runningExe -Interactive -NoLogo -Command $PSScriptRoot\startPrompt.ps1 -repoPath $currentRepo -repoName $repoName"
+$startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'startPrompt.ps1'
+$result = "$runningExe -Interactive -NoLogo -Command $startPromptPath -repoPath $currentRepo -repoName $repoName"
 
 Write-Host "Basic version:"
 Write-Host $result

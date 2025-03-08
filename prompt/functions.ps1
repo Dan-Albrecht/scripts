@@ -333,7 +333,7 @@ function Invoke-FetchPull {
             Default { throw "Dunno what to do with $targetBranch" }
         }
 
-        RunAndThrowOnNonZero -arguments "git.exe $action $remote $branchName" -shouldThrow $true
+        RunAndThrowOnNonZero -arguments "$(Get-Git) $action $remote $branchName" -shouldThrow $true
     }
     else {
         Write-NonTerminatingError "This isn't a git repo..."
@@ -358,7 +358,7 @@ function Invoke-Rebase {
         $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
         $defaultBranch = $currentSettings.DefaultBranch
 
-        RunAndThrowOnNonZero -arguments "git.exe pull --rebase $remote $defaultBranch" -shouldThrow $true
+        RunAndThrowOnNonZero -arguments "$(Get-Git) pull --rebase $remote $defaultBranch" -shouldThrow $true
     }
     else {
         Write-NonTerminatingError "This isn't a git repo..."
@@ -382,8 +382,8 @@ function Invoke-Squash {
         $currentSettings = [RepoSettings]::GetCurrentSettings($PromptSettings.SettingsFile)
         $defaultBranch = $currentSettings.DefaultBranch
 
-        RunAndThrowOnNonZero -arguments "git.exe --soft $remote/$defaultBranch"
-        RunAndThrowOnNonZero -arguments "git.exe add --all"
+        RunAndThrowOnNonZero -arguments "$(Get-Git) --soft $remote/$defaultBranch"
+        RunAndThrowOnNonZero -arguments "$(Get-Git) add --all"
     }
     else {
         Write-NonTerminatingError "This isn't a git repo..."
@@ -507,7 +507,13 @@ function Import-ModuleEx {
         [Parameter(Mandatory = $false)][string]$potentialReleaseNotes
     )
 
-    $checkName = [System.IO.Path]::Combine($env:TMP, $name + '.check')
+    if ($IsWindows) {
+        $temp = "$env:TMP"
+    } else {
+        $temp = "$env:HOME/.cache"
+    }
+
+    $checkName = [System.IO.Path]::Combine($temp, $name + '.check')
     $threeDays = [timespan]::FromDays(3)
     if (SomethingAboutTouching -filename $checkName -howLong $threeDays) {
 
@@ -747,4 +753,13 @@ function Format-File {
     }
     
     $outWriter.Close()
+}
+
+function Get-Git {
+    if ($IsWindows) {
+        "git.exe"
+    }
+    else {
+        "git"
+    }
 }
