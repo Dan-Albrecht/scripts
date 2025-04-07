@@ -155,7 +155,13 @@ function Test-SearchPath {
         [Parameter(Mandatory = $true)][string]$search
     )
 
-    where.exe /Q $search | Out-Null
+    if ($IsLinux) {
+        which -s $search
+    }
+    else {
+        where.exe /Q $search | Out-Null
+    }
+
     $whereResult = $LASTEXITCODE
     
     # Where uses exit codes to return what it found. We don't need this to propagate outside of this function.
@@ -271,18 +277,25 @@ function Invoke-CheckPowerShell {
 function Invoke-CheckRust {
     param ()
 
-    if (-not (Test-SearchPath -search "rustup.exe")) {
-        Write-Error "rustup.exe not intalled. Install from https://www.rust-lang.org/tools/install"
+    if (-not (Test-SearchPath -search "rustup")) {
+        Write-Error "rustup not intalled. Install from https://www.rust-lang.org/tools/install"
         return
     }
 
-    rustup.exe check | findstr.exe /sc:"Update available" | Out-Null
+    if ($IsLinux) {
+        rustup check | grep "Update available" | Out-Null
+    }
+    else {
+        rustup check | findstr.exe /sc:"Update available" | Out-Null
+    }
+
     $lastExit = $LASTEXITCODE
+    $LASTEXITCODE = 0
 
     if ($lastExit -eq 0) {
         Write-Host "Rust needs an update:"
-        rustup.exe check
-        Write-Host "To update: rustup.exe update"
+        rustup check
+        Write-Host "To update: rustup update"
     }
     else {
         Write-Host "Rust is up to date"
@@ -509,7 +522,8 @@ function Import-ModuleEx {
 
     if ($IsWindows) {
         $temp = "$env:TMP"
-    } else {
+    }
+    else {
         $temp = "$env:HOME/.cache"
     }
 

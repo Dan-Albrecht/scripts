@@ -3,7 +3,7 @@
 Starts a developer prompt centered on a repo.
 
 .PARAMETER repoPath
-Full path of the repo.
+Full path of the repo.  
 
 .PARAMETER repoName
 Friendly name to refer to the repo as.
@@ -24,8 +24,6 @@ param (
 )
 
 $ErrorActionPreference = 'Stop'
-
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', "New preference variable editor doesn't know yet")]
 $PSNativeCommandUseErrorActionPreference = $false
 
 # Set this immeidately with the builtin syntax incase we have any errors
@@ -49,42 +47,44 @@ $global:PromptSettings = [PromptSettings]::new($settingsPath)
 # $ErrorView = 'ConciseView' doesn't apply to scripts so have to do a customer formatter
 Update-FormatData -PrependPath $PSScriptRoot\betterErrors.Format.ps1xml
 
-if (Test-Path -Path $vsWherePath) {
-    Write-Host 'Getting VS install path...' -NoNewline
-    . TimeCommand { 
-        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
-        $vsInstallPath = & $vsWherePath -prerelease -latest -all -property installationPath 
-    }
-    if ($null -eq $vsInstallPath) {
-        Write-Host 'VSWhere is screwed up again'
-    }
-    else {
-        Write-Host 'Getting VS display name...' -NoNewline
+if ($IsWindows) {
+    if (Test-Path -Path $vsWherePath) {
+        Write-Host 'Getting VS install path...' -NoNewline
         . TimeCommand { 
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
-            $vsToolsDisplayName = & $vsWherePath -prerelease -latest -all -property catalog_productDisplayVersion 
+            $vsInstallPath = & $vsWherePath -prerelease -latest -all -property installationPath 
         }
-
-        Write-Host 'Find VS module...' -NoNewline
-        . TimeCommand {
-            [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
-            $vsModule = (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
-        }
-
-        if ($null -eq $vsModule) {
-            Write-Host 'VS module not found'
+        if ($null -eq $vsInstallPath) {
+            Write-Host 'VSWhere is screwed up again'
         }
         else {
-            Write-Host 'Loading it...' -NoNewline
-            . TimeCommand { Import-Module $vsModule }
-            Write-Host 'Loading dev shell...' -NoNewline
-            . TimeCommand { Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null }
-            Write-Host "Tools version: $vsToolsDisplayName"
+            Write-Host 'Getting VS display name...' -NoNewline
+            . TimeCommand { 
+                [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+                $vsToolsDisplayName = & $vsWherePath -prerelease -latest -all -property catalog_productDisplayVersion 
+            }
+
+            Write-Host 'Find VS module...' -NoNewline
+            . TimeCommand {
+                [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
+                $vsModule = (Get-ChildItem $vsInstallPath -Recurse -File -Filter Microsoft.VisualStudio.DevShell.dll).FullName
+            }
+
+            if ($null -eq $vsModule) {
+                Write-Host 'VS module not found'
+            }
+            else {
+                Write-Host 'Loading it...' -NoNewline
+                . TimeCommand { Import-Module $vsModule }
+                Write-Host 'Loading dev shell...' -NoNewline
+                . TimeCommand { Enter-VsDevShell -VsInstallPath $vsInstallPath -DevCmdArguments '-arch=x64' | Out-Null }
+                Write-Host "Tools version: $vsToolsDisplayName"
+            }
         }
     }
-}
-else {
-    Write-Warning "VS was not found so you're not gonna have (m)any build tools"
+    else {
+        Write-Warning "VS was not found so you're not gonna have (m)any build tools"
+    }
 }
 
 # Stop PowerShell from camping on exes we care about
@@ -109,7 +109,14 @@ CreateDynamicAlias -name 'fu' -action 'Invoke-FetchPull -fetchOnly $true -target
 CreateDynamicAlias -name 'gs' -action 'git status'
 CreateDynamicAlias -name 'kill' -action 'Stop-ProcessExWrapper' -allowArgs
 CreateDynamicAlias -name 'mp' -action "$PSScriptRoot\generatePrompt.ps1"
-CreateDynamicAlias -name 'n' -action "notepad.exe `$args"
+
+if ($IsWindows) {
+    CreateDynamicAlias -name 'n' -action "notepad.exe `$args"
+}
+else {
+    CreateDynamicAlias -name 'n' -action "nano `$args"
+}
+
 CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$rootPath'"
 CreateDynamicAlias -name 'nt2' -action "Set-Location -Path '$PSScriptRoot'"
 CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
