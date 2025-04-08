@@ -136,6 +136,9 @@ if ($IsLinux) {
     CreateDynamicAlias -name 'where' -action "which `$args"
     CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
     CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
+} else {
+    # Force gets hidden items
+    CreateDynamicAlias -name 'll' -action 'Get-ChildItem -Force' -allowArgs
 }
 
 Set-Location -Path $rootPath
