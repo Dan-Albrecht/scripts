@@ -156,7 +156,7 @@ function Test-SearchPath {
     )
 
     if ($IsLinux) {
-        which -s $search
+        which $search | Out-Null
     }
     else {
         where.exe /Q $search | Out-Null
