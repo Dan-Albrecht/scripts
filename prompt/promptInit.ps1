@@ -82,7 +82,7 @@ if ($IsWindows) {
             }
         }
     }
-    else {
+    elseif ($IsWindows) {
         Write-Warning "VS was not found so you're not gonna have (m)any build tools"
     }
 }
@@ -133,10 +133,12 @@ CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
 if ($IsLinux) {
+    CreateDynamicAlias -name 'code' -action "& '/mnt/c/Program Files/Microsoft VS Code/bin/code'" -allowArgs
     CreateDynamicAlias -name 'where' -action "which `$args"
     CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
     CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
-} else {
+}
+else {
     # Force gets hidden items
     CreateDynamicAlias -name 'll' -action 'Get-ChildItem -Force' -allowArgs
 }

@@ -270,7 +270,7 @@ function Invoke-CheckPowerShell {
         }
     }
     elseif ($installed -gt $release) {
-        Write-Warning "You're running a future version of PowerShell?"
+        Write-Warning "You're running ($installed) a future version of PowerShell (latest is $release)?"
     }
 }
 
