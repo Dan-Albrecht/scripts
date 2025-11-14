@@ -150,7 +150,7 @@ $Host.UI.RawUI.WindowTitle = $repoName
 Import-ModuleEx -name 'posh-git' -version '1.1.0'
 $GitPromptSettings.EnableStashStatus = $true
 
-Import-ModuleEx -name 'PSReadLine' -version '2.3.6' -potentialReleaseNotes 'https://github.com/PowerShell/PSReadLine/releases'
+Import-ModuleEx -name 'PSReadLine' -version '2.4.5' -potentialReleaseNotes 'https://github.com/PowerShell/PSReadLine/releases'
 
 $env:RUST_BACKTRACE = 1
 
