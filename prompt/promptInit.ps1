@@ -119,6 +119,7 @@ else {
 
 CreateDynamicAlias -name 'nt' -action "Set-Location -Path '$rootPath'"
 CreateDynamicAlias -name 'nt2' -action "Set-Location -Path '$PSScriptRoot'"
+CreateDynamicAlias -name 'ntr' -action "Set-Location -Path '$repoPath'"
 CreateDynamicAlias -name 'pm' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Default'
 CreateDynamicAlias -name 'pu' -action 'Invoke-FetchPull -fetchOnly $false -targetBranch Upstream'
 CreateDynamicAlias -name 'push' -action "Invoke-GitPush `$args[0]"
