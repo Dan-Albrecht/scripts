@@ -6,6 +6,7 @@ function prompt {
         $noGit = [char]::ConvertFromUtf32(0xf0164)
         $highVoltage = [char]::ConvertFromUtf32(0x26a1)
         $classicWindows = [char]::ConvertFromUtf32(0xF0A21)
+        $linuxTux = [char]::ConvertFromUtf32(0xEBC6)
         $origLastExitCode = $LASTEXITCODE
 
         # Could also names from https://www.w3schools.com/Colors/colors_names.asp
@@ -38,7 +39,8 @@ function prompt {
             }
         }
         else {
-            $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object '🐧'
+            # Potetnial alternative, generic emoji penguin: 🐧 (U+1F427)
+            $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $linuxTux
         }
 
         $prompt += Write-Prompt -ForegroundColor $adminBackground -BackgroundColor $timeBackground -Object $triangleRight
@@ -130,8 +132,14 @@ function CreateDynamicAlias() {
     param(
         [Parameter(Mandatory = $true)][string]$name,
         [Parameter(Mandatory = $true)][string]$action,
-        [Parameter(Mandatory = $false)][Switch]$allowArgs
+        [Parameter(Mandatory = $false)][Switch]$allowArgs,
+        [Parameter(Mandatory = $false)][Switch]$respectExisting
     )
+
+    if ($respectExisting -and (Test-SearchPath -search $name)) {
+        Write-Host "Not creating alias $name because it already exists in the search path"
+        return
+    }
 
     $functionName = [guid]::NewGuid().ToString('N')
     

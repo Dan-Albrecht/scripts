@@ -134,7 +134,7 @@ CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
 if ($IsLinux) {
-    CreateDynamicAlias -name 'code' -action "& '/mnt/c/Program Files/Microsoft VS Code/bin/code'" -allowArgs
+    CreateDynamicAlias -name 'code' -action "& '/mnt/c/Program Files/Microsoft VS Code/bin/code'" -allowArgs -respectExisting
     CreateDynamicAlias -name 'where' -action "which `$args"
     CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
     CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
