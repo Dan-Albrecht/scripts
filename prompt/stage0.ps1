@@ -30,7 +30,7 @@ $powerShellPath = (Get-Process -Id $PID).Path
 Write-Host "We'll be using $powerShellPath for our child shell"
 
 $magicExitCode = 27
-$scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\promptInit.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
+$scriptArgs = @('-NoExit', '-NoLogo', '-Interactive', '-File', "$PSScriptRoot\stage1.ps1", '-repoPath', $repoPath, '-repoName', $repoName, '-relaunchMeExitCode', $magicExitCode)
 
 if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     $scriptArgs += @('-stage2Script', $stage2Script)
