@@ -250,31 +250,35 @@ function Invoke-CheckPowerShell {
     }
 
     if ($installed -lt $release) {
-        $packageName = "PowerShell-${release}-win-x64.msi"
-        $downloadURL = "https://github.com/PowerShell/PowerShell/releases/download/v${release}/${packageName}"
+        if ($IsWindows) {
+            $packageName = "PowerShell-${release}-win-x64.msi"
+            $downloadURL = "https://github.com/PowerShell/PowerShell/releases/download/v${release}/${packageName}"
         
-        Write-Host "PowerShell version $installed is out of date, update to ${release}:"
-        Write-Host "Release notes: https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
-        Write-Host $downloadURL        
-        $answer = Read-Host 'Do you want to install it now (y/n)'
+            Write-Host "PowerShell version $installed is out of date, update to ${release}:"
+            Write-Host "Release notes: https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
+            Write-Host $downloadURL        
+            $answer = Read-Host 'Do you want to install it now (y/n)'
         
-        if ($answer -eq 'y' -or $answer -eq 'yes') {
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
-            $null = New-Item -ItemType Directory -Path $tempDir
-            $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
-            try {
-                Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5    
-            }
-            catch {
-                Write-Warning 'Failed to start download, did you go offline?'
-                return
-            }
+            if ($answer -eq 'y' -or $answer -eq 'yes') {
+                $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+                $null = New-Item -ItemType Directory -Path $tempDir
+                $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
+                try {
+                    Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5    
+                }
+                catch {
+                    Write-Warning 'Failed to start download, did you go offline?'
+                    return
+                }
             
-            Start-Process $packagePath
-            Write-Warning 'Installer running, you should close all windows so it can update without reboot'
-        }
-        else {
-            Write-Host 'Loser'
+                Start-Process $packagePath
+                Write-Warning 'Installer running, you should close all windows so it can update without reboot'
+            }
+            else {
+                Write-Host 'Loser'
+            }
+        } else {
+            Write-Warning "You're running PowerShell $installed, but $release is available. Update via your package manager or from https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
         }
     }
     elseif ($installed -gt $release) {
