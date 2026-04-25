@@ -188,6 +188,9 @@ if ($IsLinux) {
 
                 # This is the thing that gives the suggestions about what potential package to install via apt to resolve a missing command
                 /usr/lib/command-not-found $commandName
+
+                # Try and make this really abort calling stuff
+                throw "Command not found: $commandName"
             }.GetNewClosure()
         }
         else {
