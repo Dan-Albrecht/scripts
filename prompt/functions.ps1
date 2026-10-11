@@ -6,7 +6,8 @@ function prompt {
         $noGit = [char]::ConvertFromUtf32(0xf0164)
         $highVoltage = [char]::ConvertFromUtf32(0x26a1)
         $classicWindows = [char]::ConvertFromUtf32(0xF0A21)
-        $linuxTux = [char]::ConvertFromUtf32(0xEBC6)
+        # $linuxTux = [char]::ConvertFromUtf32(0xEBC6)
+        $linuxTux = [char]::ConvertFromUtf32(0x1F427)
         $origLastExitCode = $LASTEXITCODE
 
         # Could also names from https://www.w3schools.com/Colors/colors_names.asp
@@ -39,7 +40,6 @@ function prompt {
             }
         }
         else {
-            # Potetnial alternative, generic emoji penguin: 🐧 (U+1F427)
             $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $linuxTux
         }
 
@@ -277,7 +277,8 @@ function Invoke-CheckPowerShell {
             else {
                 Write-Host 'Loser'
             }
-        } else {
+        }
+        else {
             Write-Warning "You're running PowerShell $installed, but $release is available. Update via your package manager or from https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
         }
     }
@@ -481,6 +482,27 @@ function Format-ActuallyConcise {
     )
 
     try {
+
+        # Doing CommandNotFoundException handling here instead of the logical CommandNotFoundAction 
+        # as it seems impossible to handle all permutations of how PowerShell searched for commands
+        # by sometimes also looking for the command with a 'get-' prefix in a way that wouldn't
+        # sometimes result in outputting two error messages.
+        # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing
+        if ($errorRecord.FullyQualifiedErrorId -eq 'CommandNotFoundException') {
+            $commandNotFoundPath = '/usr/lib/command-not-found'
+
+            if (Test-Path $commandNotFoundPath) {
+                $commandNotFoundOutput = & $commandNotFoundPath $errorRecord.TargetObject 2>&1
+                Write-Host ($commandNotFoundOutput -join [System.Environment]::NewLine)
+                return
+            }
+            else {
+                Write-WarningEx "Command not found handler $commandNotFoundPath does not exist; cannot give you suggestions for the unknown command $($errorRecord.TargetObject)"
+                $global:LASTEXITCODE = 127
+                return
+            }
+        }
+
         $exceptionMessage = $errorRecord.Exception.Message
         $st = $errorRecord.ScriptStackTrace
         $split = $st.Split([System.Environment]::NewLine, [StringSplitOptions]::RemoveEmptyEntries)
