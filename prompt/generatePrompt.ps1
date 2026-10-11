@@ -11,8 +11,14 @@ if (![string]::IsNullOrWhiteSpace($gitOutput)) {
     $currentRepo = [System.IO.Path]::GetFullPath($gitOutput)
 }
 
-$startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'startPrompt.ps1'
-$result = "$runningExe -Interactive -NoLogo -Command $startPromptPath -repoPath $currentRepo -repoName $repoName"
+if ($IsLinux) {
+    $startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'stage0.sh'
+    $result = "exec bash $startPromptPath -repoPath $currentRepo -repoName $repoName -powerShellPath $runningExe"
+}
+else {
+    $startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'stage0.ps1'
+    $result = "$runningExe -Interactive -NoLogo -Command $startPromptPath -repoPath $currentRepo -repoName $repoName"
+}
 
 Write-Host "Basic version:"
 Write-Host $result
