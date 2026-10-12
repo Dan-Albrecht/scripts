@@ -40,6 +40,7 @@ function prompt {
             }
         }
         else {
+            $prompt += "$([System.Environment]::UserName)@$([System.Environment]::MachineName)"
             $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $linuxTux
         }
 
