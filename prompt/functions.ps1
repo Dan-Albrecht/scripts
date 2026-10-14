@@ -483,13 +483,12 @@ function Format-ActuallyConcise {
     )
 
     try {
-
         # Doing CommandNotFoundException handling here instead of the logical CommandNotFoundAction 
         # as it seems impossible to handle all permutations of how PowerShell searched for commands
         # by sometimes also looking for the command with a 'get-' prefix in a way that wouldn't
         # sometimes result in outputting two error messages.
         # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing
-        if ($errorRecord.FullyQualifiedErrorId -eq 'CommandNotFoundException') {
+        if ($errorRecord.Exception -is [System.Management.Automation.CommandNotFoundException]) {
             $commandNotFoundPath = '/usr/lib/command-not-found'
 
             if (Test-Path $commandNotFoundPath) {

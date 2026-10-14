@@ -31,6 +31,11 @@ $PSNativeCommandUseErrorActionPreference = $false
 function RelaunchMe { exit $relaunchMeExitCode }
 Set-Alias -Name 're' -Value 'RelaunchMe'
 
+$global:IsWsl = $IsLinux -and (
+    (Get-Content /proc/sys/kernel/osrelease -Raw) -match '(?i)microsoft|wsl'
+)
+$global:IsNativeLinux = $IsLinux -and -not $global:IsWsl
+
 if ([string]::IsNullOrWhiteSpace($rootPath)) {
     $rootPath = $repoPath
 }
@@ -134,7 +139,6 @@ CreateDynamicAlias -name 'spy64' -action 'spyxx_amd64.exe'
 CreateDynamicAlias -name 'title' -action "`$Host.UI.RawUI.WindowTitle = `$args"
 
 if ($IsLinux) {
-    CreateDynamicAlias -name 'code' -action "& '/mnt/c/Program Files/Microsoft VS Code/bin/code'" -allowArgs -respectExisting
     CreateDynamicAlias -name 'where' -action "which `$args"
     CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
     CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
@@ -142,6 +146,10 @@ if ($IsLinux) {
 else {
     # Force gets hidden items
     CreateDynamicAlias -name 'll' -action 'Get-ChildItem -Force' -allowArgs
+}
+
+if ($IsWsl) {
+    CreateDynamicAlias -name 'code' -action "& '/mnt/c/Program Files/Microsoft VS Code/bin/code'" -allowArgs -respectExisting
 }
 
 Set-Location -Path $rootPath
