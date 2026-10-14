@@ -58,8 +58,7 @@ do {
         $loop = $exitCode -eq $magicExitCode
 
         Write-Host "Child process exited with $exitCode. Reinvoke: $loop."
-    }
-    catch {
+    } catch {
         $loop = $false
         Write-Error $_
         Set-Item function:prompt {

@@ -14,8 +14,7 @@ if (![string]::IsNullOrWhiteSpace($gitOutput)) {
 if ($IsLinux) {
     $startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'stage0.sh'
     $result = "exec bash $startPromptPath -repoPath $currentRepo -repoName $repoName -powerShellPath $runningExe"
-}
-else {
+} else {
     $startPromptPath = Join-Path -Path $PSScriptRoot -ChildPath 'stage0.ps1'
     $result = "$runningExe -Interactive -NoLogo -Command $startPromptPath -repoPath $currentRepo -repoName $repoName"
 }

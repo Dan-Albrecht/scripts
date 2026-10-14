@@ -61,8 +61,7 @@ if ($IsWindows) {
         }
         if ($null -eq $vsInstallPath) {
             Write-Host 'VSWhere is screwed up again'
-        }
-        else {
+        } else {
             Write-Host 'Getting VS display name...' -NoNewline
             . TimeCommand { 
                 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'I am')]
@@ -77,8 +76,7 @@ if ($IsWindows) {
 
             if ($null -eq $vsModule) {
                 Write-Host 'VS module not found'
-            }
-            else {
+            } else {
                 Write-Host 'Loading it...' -NoNewline
                 . TimeCommand { Import-Module $vsModule }
                 Write-Host 'Loading dev shell...' -NoNewline
@@ -86,8 +84,7 @@ if ($IsWindows) {
                 Write-Host "Tools version: $vsToolsDisplayName"
             }
         }
-    }
-    elseif ($IsWindows) {
+    } elseif ($IsWindows) {
         Write-Warning "VS was not found so you're not gonna have (m)any build tools"
     }
 }
@@ -117,8 +114,7 @@ CreateDynamicAlias -name 'mp' -action "$PSScriptRoot\generatePrompt.ps1"
 
 if ($IsWindows) {
     CreateDynamicAlias -name 'n' -action "notepad.exe `$args"
-}
-else {
+} else {
     CreateDynamicAlias -name 'n' -action "nano `$args"
 }
 
@@ -142,8 +138,7 @@ if ($IsLinux) {
     CreateDynamicAlias -name 'where' -action "which `$args"
     CreateDynamicAlias -name 'ls' -action "/usr/bin/ls --color=auto" -allowArgs
     CreateDynamicAlias -name 'll' -action "/usr/bin/ls --color=auto -alF" -allowArgs
-}
-else {
+} else {
     # Force gets hidden items
     CreateDynamicAlias -name 'll' -action 'Get-ChildItem -Force' -allowArgs
 }
@@ -172,8 +167,7 @@ if (![string]::IsNullOrWhiteSpace($stage2Script)) {
     if (Test-Path -Path $stage2Script) {
         Write-Host "Chaining to $stage2Script..."
         . $stage2Script -rootPath $rootPath
-    }
-    else {
+    } else {
         Write-Error "Stage2 script $stage2Script doesn't exist"
     }
 }

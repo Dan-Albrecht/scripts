@@ -34,12 +34,10 @@ function prompt {
 
             if ($isAdmin) {
                 $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $highVoltage
-            }
-            else {
+            } else {
                 $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object '💩'
             }
-        }
-        else {
+        } else {
             $prompt += "$([System.Environment]::UserName)@$([System.Environment]::MachineName)"
             $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $linuxTux
         }
@@ -58,8 +56,7 @@ function prompt {
 
             # $status is already (multi) colored, so don't set it
             $prompt += Write-Prompt -BackgroundColor $gitStatusBackground -Object $status
-        }
-        else {
+        } else {
             $prompt += Write-Prompt -ForegroundColor $gitStatusForeground -BackgroundColor $gitStatusBackground -Object ($noGit + ' ')
         }
 
@@ -71,8 +68,7 @@ function prompt {
         $LASTEXITCODE = $origLastExitCode
         # "⧸ " + $prompt + "⧹ "
         $prompt = '▕▔ ' + $prompt + '▕▁ '
-    }
-    catch {
+    } catch {
         $prompt = 'Prompt screwed up with: '
         $prompt += $Error[0]
         $prompt += "`n"
@@ -96,8 +92,7 @@ function SplitIntoArgs {
     foreach ($regexMatch in $regexMatches) {
         if ($stripQuotes) {
             $item = $regexMatch.Value.Trim([char[]]@('"', "`'"))
-        }
-        else {
+        } else {
             $item = $regexMatch.Value
         }
         $result.Add($item)
@@ -146,8 +141,7 @@ function CreateDynamicAlias() {
     
     if ($allowArgs) {
         $dynamicFunction = "function global:$functionName { param([Parameter(Mandatory = " + '$false, ValueFromRemainingArguments = $true)][string[]]$args)' + $action + ' $args }'
-    }
-    else {
+    } else {
         $dynamicFunction = "function global:$functionName() {$action}"
     }
 
@@ -166,8 +160,7 @@ function Test-SearchPath {
 
     if ($IsLinux) {
         which $search | Out-Null
-    }
-    else {
+    } else {
         where.exe /Q $search | Out-Null
     }
 
@@ -178,8 +171,7 @@ function Test-SearchPath {
 
     if ($whereResult -eq 0) {
         return $true
-    }
-    else {
+    } else {
         return $false
     }
 }
@@ -226,8 +218,7 @@ function Invoke-CheckPowerShell {
     try {
         # https://github.com/PowerShell/PowerShell/blob/master/tools/install-powershell.ps1
         $metadata = Invoke-RestMethod -Uri https://raw.githubusercontent.com/PowerShell/PowerShell/master/tools/metadata.json -TimeoutSec 5
-    }
-    catch {
+    } catch {
         Write-Warning "Couldn't check latest PowerShell. Are you online?"
         return
     }    
@@ -244,8 +235,7 @@ function Invoke-CheckPowerShell {
             Write-Warning "You're running preview $release, but mainline is ahead at $mainLineRelease. Consider moving to mainline again or validate preview builds are still shipped the same way as ever."
             $release = $mainLineRelease
         }
-    }
-    else {
+    } else {
         $release = $metadata.ReleaseTag -replace '^v'
         $release = [System.Management.Automation.SemanticVersion]::new($release)        
     }
@@ -266,24 +256,20 @@ function Invoke-CheckPowerShell {
                 $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
                 try {
                     Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5    
-                }
-                catch {
+                } catch {
                     Write-Warning 'Failed to start download, did you go offline?'
                     return
                 }
             
                 Start-Process $packagePath
                 Write-Warning 'Installer running, you should close all windows so it can update without reboot'
-            }
-            else {
+            } else {
                 Write-Host 'Loser'
             }
-        }
-        else {
+        } else {
             Write-Warning "You're running PowerShell $installed, but $release is available. Update via your package manager or from https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
         }
-    }
-    elseif ($installed -gt $release) {
+    } elseif ($installed -gt $release) {
         Write-Warning "You're running ($installed) a future version of PowerShell (latest is $release)?"
     }
 }
@@ -298,8 +284,7 @@ function Invoke-CheckRust {
 
     if ($IsLinux) {
         rustup check | grep "Update available" | Out-Null
-    }
-    else {
+    } else {
         rustup check | findstr.exe /sc:"Update available" | Out-Null
     }
 
@@ -310,8 +295,7 @@ function Invoke-CheckRust {
         Write-Host "Rust needs an update:"
         rustup check
         Write-Host "To update: rustup update"
-    }
-    else {
+    } else {
         Write-Host "Rust is up to date"
     }
 
@@ -349,8 +333,7 @@ function Invoke-FetchPull {
 
         if ($fetchOnly) {
             $action = 'fetch'
-        }
-        else {
+        } else {
             $action = 'pull'
         }
 
@@ -361,8 +344,7 @@ function Invoke-FetchPull {
         }
 
         RunAndThrowOnNonZero -arguments "$(Get-Git) $action $remote $branchName" -shouldThrow $true
-    }
-    else {
+    } else {
         Write-NonTerminatingError "This isn't a git repo..."
     }
     
@@ -386,8 +368,7 @@ function Invoke-Rebase {
         $defaultBranch = $currentSettings.DefaultBranch
 
         RunAndThrowOnNonZero -arguments "$(Get-Git) pull --rebase $remote $defaultBranch" -shouldThrow $true
-    }
-    else {
+    } else {
         Write-NonTerminatingError "This isn't a git repo..."
     }
 }
@@ -411,8 +392,7 @@ function Invoke-Squash {
 
         RunAndThrowOnNonZero -arguments "$(Get-Git) --soft $remote/$defaultBranch"
         RunAndThrowOnNonZero -arguments "$(Get-Git) add --all"
-    }
-    else {
+    } else {
         Write-NonTerminatingError "This isn't a git repo..."
     }    
 }
@@ -450,18 +430,15 @@ function Get-AliasEx {
         foreach ($item in $PromptSettings.Aliases.GetEnumerator()) {
             Write-Host "$($item.Key) -> $($item.Value)"
         }
-    }
-    else {
+    } else {
         [string]$foundAlias = $null
         if ($PromptSettings.Aliases.TryGetValue($alias, [ref]$foundAlias)) {
             return "$alias -> $foundAlias"
-        }
-        else {
+        } else {
             $normalAlias = Get-Alias -Name $alias -ErrorAction Ignore
             if ($null -ne $normalAlias) {
                 $normalAlias
-            }
-            else {
+            } else {
                 Write-NonTerminatingError "There is no alias called $alias, you dingus"
             }
         }        
@@ -495,8 +472,7 @@ function Format-ActuallyConcise {
                 $commandNotFoundOutput = & $commandNotFoundPath $errorRecord.TargetObject 2>&1
                 Write-Host ($commandNotFoundOutput -join [System.Environment]::NewLine)
                 return
-            }
-            else {
+            } else {
                 Write-WarningEx "Command not found handler $commandNotFoundPath does not exist; cannot give you suggestions for the unknown command $($errorRecord.TargetObject)"
                 $global:LASTEXITCODE = 127
                 return
@@ -511,8 +487,7 @@ function Format-ActuallyConcise {
         foreach ($line in $split) {
             if ($line -eq 'at <ScriptBlock>, <No file>: line 1') {
                 $line = 'The Console'
-            }
-            elseif ($line.StartsWith('at global:') -and $line.EndsWith(', <No file>: line 1')) {
+            } elseif ($line.StartsWith('at global:') -and $line.EndsWith(', <No file>: line 1')) {
                 $potentialAlias = $line.Replace('at global:', [string]$null).Replace(', <No file>: line 1', [string]$null)
                 $alias = Get-Alias -Definition $potentialAlias -ErrorAction SilentlyContinue
                 if ($null -ne $alias) {
@@ -525,8 +500,7 @@ function Format-ActuallyConcise {
 
             Write-Host -ForegroundColor DarkGray "  $line"
         }
-    }
-    catch {
+    } catch {
         # Not sure if possible, but try and prevent recursive loop caused by outputting another ErrorRecord here
         $message = $_.ToString()
         Write-Host "Screwed up writing error: $message"
@@ -556,8 +530,7 @@ function Import-ModuleEx {
 
     if ($IsWindows) {
         $temp = "$env:TMP"
-    }
-    else {
+    } else {
         $temp = "$env:HOME/.cache"
     }
 
@@ -658,8 +631,7 @@ function TouchFile {
     $file = Get-ChildItem -Path $filename -ErrorAction SilentlyContinue
     if ($null -ne $file) {
         $file.LastWriteTimeUtc = Get-Date -AsUTC
-    }
-    else {
+    } else {
         New-Item -Path $filename | Out-Null
     }
 }
@@ -716,12 +688,10 @@ function Stop-ProcessEx {
 
     if ($null -eq $procs -or $procs.Length -eq 0) {
         Write-Warning 'Found nothing to kill'
-    }
-    else {
+    } else {
         if ($forceKill) {
             $procs | Stop-Process -Force
-        }
-        else {
+        } else {
             $procs | Where-Object { $_.MainWindowHandle -ne [System.IntPtr]::Zero } | ForEach-Object { $_.CloseMainWindow() } | Out-Null
 
             # Force is about killing another user's process, not about doing a nice shutdown
@@ -740,22 +710,18 @@ function Stop-ProcessExWrapper {
 
     if ($null -eq $args -or $args.Length -eq 0) {
         Write-Error 'What, exactly, are you expecting me to kill?'
-    }
-    else {
+    } else {
         $usage = 'Usage: [-f] <name>'
 
         if ($args.Length -gt 2) {
             Write-Error $usage
-        }
-        else {
+        } else {
             if ($args.Length -eq 1) {
                 Stop-ProcessEx -name $args[0]
-            }
-            else {
+            } else {
                 if ($args[0] -ne '-f') {
                     Write-Error $usage
-                }
-                else {
+                } else {
                     Stop-ProcessEx -name $args[1] -forceKill $true
                 }
             }
@@ -806,8 +772,7 @@ function Format-File {
 function Get-Git {
     if ($IsWindows) {
         "git.exe"
-    }
-    else {
+    } else {
         "git"
     }
 }

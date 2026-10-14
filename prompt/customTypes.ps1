@@ -58,8 +58,7 @@ class RepoSettings {
 
             # TerminatingError should have terminated, but analyzer doesn't know that
             throw "Shouldn't have reached here"
-        }
-        else {
+        } else {
             $allText = Get-Content -Path $settingsFile
             $settings = [System.Text.Json.JsonSerializer]::Deserialize($allText, [RepoSettings[]], [System.Text.Json.JsonSerializerOptions]$null)
             return $settings
