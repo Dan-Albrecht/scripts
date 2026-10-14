@@ -38,8 +38,8 @@ function prompt {
                 $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object '💩'
             }
         } else {
-            $prompt += "$([System.Environment]::UserName)@$([System.Environment]::MachineName)"
             $prompt += Write-Prompt -ForegroundColor $adminForgeground -BackgroundColor $adminBackground -Object $linuxTux
+            $prompt += Write-Prompt -ForegroundColor '#00FF00' -BackgroundColor $adminBackground -Object "$([System.Environment]::UserName)@$([System.Environment]::MachineName)"
         }
 
         $prompt += Write-Prompt -ForegroundColor $adminBackground -BackgroundColor $timeBackground -Object $triangleRight
