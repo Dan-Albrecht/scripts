@@ -115,7 +115,7 @@ function RunAndThrowOnNonZero {
     $parsedArgs = SplitIntoArgs -arguments $arguments -stripQuotes $false
     $exeName = $parsedArgs[0]
     $restOfArgs = $parsedArgs[1..$parsedArgs.Length]
-    
+
     $proccess = Start-Process -FilePath $exeName -ArgumentList $restOfArgs -PassThru -NoNewWindow
     $proccess | Wait-Process
 
@@ -138,9 +138,9 @@ function CreateDynamicAlias() {
     }
 
     $functionName = [guid]::NewGuid().ToString('N')
-    
+
     if ($allowArgs) {
-        $dynamicFunction = "function global:$functionName { param([Parameter(Mandatory = " + '$false, ValueFromRemainingArguments = $true)][string[]]$args)' + $action + ' $args }'
+        $dynamicFunction = "function global:$functionName { param([Parameter(Mandatory = " + '$false, ValueFromRemainingArguments = $true)][string[]]$args)' + $action + ' @args }'
     } else {
         $dynamicFunction = "function global:$functionName() {$action}"
     }
@@ -165,7 +165,7 @@ function Test-SearchPath {
     }
 
     $whereResult = $LASTEXITCODE
-    
+
     # Where uses exit codes to return what it found. We don't need this to propagate outside of this function.
     $Global:LASTEXITCODE = 0
 
@@ -207,7 +207,7 @@ function Invoke-GitPush {
 
 function Invoke-CheckPowerShell {
     param ()
-    
+
     $installed = $PSVersionTable.PSVersion
 
     if (-not [string]::IsNullOrEmpty($installed.BuildLabel)) {
@@ -221,15 +221,15 @@ function Invoke-CheckPowerShell {
     } catch {
         Write-Warning "Couldn't check latest PowerShell. Are you online?"
         return
-    }    
-    
+    }
+
     if (-not [string]::IsNullOrEmpty($installed.PreReleaseLabel)) {
         $release = $metadata.PreviewReleaseTag -replace '^v'
         $release = [System.Management.Automation.SemanticVersion]::new($release)
 
         # Mainline may get ahead of preview, so double check
         $mainLineRelease = $metadata.ReleaseTag -replace '^v'
-        $mainLineRelease = [System.Management.Automation.SemanticVersion]::new($mainLineRelease)        
+        $mainLineRelease = [System.Management.Automation.SemanticVersion]::new($mainLineRelease)
 
         if ($mainLineRelease -gt $release) {
             Write-Warning "You're running preview $release, but mainline is ahead at $mainLineRelease. Consider moving to mainline again or validate preview builds are still shipped the same way as ever."
@@ -237,30 +237,30 @@ function Invoke-CheckPowerShell {
         }
     } else {
         $release = $metadata.ReleaseTag -replace '^v'
-        $release = [System.Management.Automation.SemanticVersion]::new($release)        
+        $release = [System.Management.Automation.SemanticVersion]::new($release)
     }
 
     if ($installed -lt $release) {
         if ($IsWindows) {
             $packageName = "PowerShell-${release}-win-x64.msi"
             $downloadURL = "https://github.com/PowerShell/PowerShell/releases/download/v${release}/${packageName}"
-        
+
             Write-Host "PowerShell version $installed is out of date, update to ${release}:"
             Write-Host "Release notes: https://github.com/PowerShell/PowerShell/releases/tag/v${release}"
-            Write-Host $downloadURL        
+            Write-Host $downloadURL
             $answer = Read-Host 'Do you want to install it now (y/n)'
-        
+
             if ($answer -eq 'y' -or $answer -eq 'yes') {
                 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
                 $null = New-Item -ItemType Directory -Path $tempDir
                 $packagePath = Join-Path -Path $tempDir -ChildPath $packageName
                 try {
-                    Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5    
+                    Invoke-WebRequest -Uri $downloadURL -OutFile $packagePath -TimeoutSec 5
                 } catch {
                     Write-Warning 'Failed to start download, did you go offline?'
                     return
                 }
-            
+
                 Start-Process $packagePath
                 Write-Warning 'Installer running, you should close all windows so it can update without reboot'
             } else {
@@ -282,22 +282,13 @@ function Invoke-CheckRust {
         return
     }
 
-    if ($IsLinux) {
-        rustup check | grep "Update available" | Out-Null
-    } else {
-        rustup check | findstr.exe /sc:"Update available" | Out-Null
+    rustup check
+    switch ($LASTEXITCODE) {
+        0   { Write-Host "Rust is up to date" }
+        100 { Write-Host "To update: rustup update" }
+        default { Write-Warning "Rust update check failed" }
     }
-
-    $lastExit = $LASTEXITCODE
     $LASTEXITCODE = 0
-
-    if ($lastExit -eq 0) {
-        Write-Host "Rust needs an update:"
-        rustup check
-        Write-Host "To update: rustup update"
-    } else {
-        Write-Host "Rust is up to date"
-    }
 
     if (-not (Test-SearchPath -search "rg")) {
         Write-Warning "ripgrep is not installed."
@@ -313,7 +304,7 @@ function Invoke-FetchPull {
     )
 
     if ($status = Get-GitStatus -Force) {
-        
+
         if ($null -eq $status.Upstream) {
             throw 'Current upstream is not set, so cannot figure out remote'
         }
@@ -347,12 +338,12 @@ function Invoke-FetchPull {
     } else {
         Write-NonTerminatingError "This isn't a git repo..."
     }
-    
+
 }
 
 function Invoke-Rebase {
     if ($status = Get-GitStatus -Force) {
-        
+
         if ($null -eq $status.Upstream) {
             throw 'Current upstream is not set, so cannot figure out remote'
         }
@@ -375,7 +366,7 @@ function Invoke-Rebase {
 
 function Invoke-Squash {
     if ($status = Get-GitStatus -Force) {
-        
+
         if ($null -eq $status.Upstream) {
             throw 'Current upstream is not set, so cannot figure out remote'
         }
@@ -394,7 +385,7 @@ function Invoke-Squash {
         RunAndThrowOnNonZero -arguments "$(Get-Git) add --all"
     } else {
         Write-NonTerminatingError "This isn't a git repo..."
-    }    
+    }
 }
 
 function Invoke-WithErrorHandling {
@@ -441,8 +432,8 @@ function Get-AliasEx {
             } else {
                 Write-NonTerminatingError "There is no alias called $alias, you dingus"
             }
-        }        
-    }    
+        }
+    }
 }
 
 function Write-NonTerminatingError {
@@ -460,7 +451,7 @@ function Format-ActuallyConcise {
     )
 
     try {
-        # Doing CommandNotFoundException handling here instead of the logical CommandNotFoundAction 
+        # Doing CommandNotFoundException handling here instead of the logical CommandNotFoundAction
         # as it seems impossible to handle all permutations of how PowerShell searched for commands
         # by sometimes also looking for the command with a 'get-' prefix in a way that wouldn't
         # sometimes result in outputting two error messages.
@@ -554,8 +545,8 @@ function Import-ModuleEx {
         }
     }
 
-    $modules = Get-Module -Name $name -ListAvailable   
-    
+    $modules = Get-Module -Name $name -ListAvailable
+
     if ($null -eq $modules) {
         Write-Error "Module missing, run: Install-Module -Name $name -RequiredVersion $version`nRelease Details: https://www.powershellgallery.com/packages/$name/$version"
     }
@@ -627,7 +618,7 @@ function TouchFile {
     param (
         [Parameter(Mandatory = $true)][string]$filename
     )
-    
+
     $file = Get-ChildItem -Path $filename -ErrorAction SilentlyContinue
     if ($null -ne $file) {
         $file.LastWriteTimeUtc = Get-Date -AsUTC
@@ -649,7 +640,7 @@ function SomethingAboutTouching {
         if ($leaveAloneUntil -gt $now) {
             return $false
         }
-    }    
+    }
 
     TouchFile -filename $filename
     return $true
@@ -661,8 +652,8 @@ function Spin {
     )
     $now = [datetime]::UtcNow.Ticks
     $end = $now + $ticks
-    while ([datetime]::UtcNow.Ticks -le $end) {    
-    }    
+    while ([datetime]::UtcNow.Ticks -le $end) {
+    }
 }
 
 function SlowPrintFile {
@@ -745,19 +736,19 @@ function Format-File {
 
     foreach ($line in $lines) {
         $line = $line.TrimStart()
-        
+
         if ($line.Contains('}')) {
             $indentCount--
             if ($indentCount -lt 0) {
                 Write-Error "Went to negative indenting at line: $line"
             }
         }
-        
+
         $formatedLine = ''
         for ($i = 0; $i -lt $indentCount; $i++) {
             $formatedLine += '  '
         }
-        
+
         $formatedLine += ($line + "`n")
         $outWriter.Write($formatedLine)
 
@@ -765,7 +756,7 @@ function Format-File {
             $indentCount++
         }
     }
-    
+
     $outWriter.Close()
 }
 
@@ -775,4 +766,19 @@ function Get-Git {
     } else {
         "git"
     }
+}
+
+function Invoke-CreateIntoDirectory {
+    param (
+        [Parameter(Mandatory = $true)][string]$path
+    )
+
+    $fullPath = Join-Path -Path $PWD.Path -ChildPath $path
+
+    if ([System.IO.Directory]::Exists($fullPath)) {
+        throw "$path already exists"
+    }
+
+    [System.IO.Directory]::CreateDirectory($fullPath) | Out-Null
+    Set-Location -Path $fullPath
 }

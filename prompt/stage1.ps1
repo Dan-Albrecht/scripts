@@ -102,6 +102,7 @@ CreateDynamicAlias -name '..' -action 'Set-Location -Path ..'
 CreateDynamicAlias -name '...' -action 'Set-Location -Path ..\..'
 CreateDynamicAlias -name '....' -action 'Set-Location -Path ..\..\..'
 CreateDynamicAlias -name '.....' -action 'Set-Location -Path ..\..\..\..'
+CreateDynamicAlias -name 'cid' -action 'Invoke-CreateIntoDirectory' -allowArgs
 CreateDynamicAlias -name 'cr' -action 'cargo run'
 CreateDynamicAlias -name 'db' -action "dotnet build `$args[0] --no-restore --configuration Debug -p:Platform=x64"
 CreateDynamicAlias -name 'dr' -action "dotnet restore `$args[0] --interactive"
